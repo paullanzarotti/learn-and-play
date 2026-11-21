@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Learn and Play</title>
+<title>S&amp;K's Magic School</title>
 <style>
 :root{--bg1:#5b4bdb;--bg2:#9a5cf5;--ink:#2b2559;--good:#22b866;--soft:#ffb347;--accent:#ff5fa2;--muted:#8a84b8;--chip:#ece9ff}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -176,8 +176,8 @@ canvas{display:block;width:100%;border-radius:20px;background:#1d1747;touch-acti
 <!-- WELCOME / SIGN IN -->
 <section id="welcome" class="hidden">
   <div class="wrap">
-    <div class="welcome-logo">🚀</div>
-    <h1 style="text-align:center">Learn and Play</h1>
+    <div class="welcome-logo">🪄</div>
+    <h1 style="text-align:center">S&amp;K's Magic School ✨</h1>
     <p class="hello" style="text-align:center">Fun quizzes for Year 2 and Year 4. Score 9 or 10 to unlock a game!</p>
     <div class="card" style="text-align:center">
       <h2>Grown-ups: sign in to save progress</h2>
@@ -3318,7 +3318,7 @@ $('#createGo').onclick=async()=>{
 };
 $('#guestGo').onclick=()=>{ mode='guest'; lsSet(MKEY,'guest'); showPlayers(); };
 $('#gSign').onclick=async()=>{
-  if(window.top!==window.self){ $('#signMsg').textContent='Google sign-in only works on the Learn and Play website, not inside Claude. For now, tap “Play without signing in”.'; return; }
+  if(window.top!==window.self){ $('#signMsg').textContent='Google sign-in only works on the S&K’s Magic School website, not inside Claude. For now, tap “Play without signing in”.'; return; }
   if(!sb){ $('#signMsg').textContent='Google sign-in couldn’t load. Check your internet, or play without signing in.'; return; }
   $('#signMsg').textContent='Opening Google…';
   try{ const r=await fetch(SB_URL+'/auth/v1/settings',{headers:{apikey:SB_KEY}}); const j=await r.json(); if(j&&j.external&&j.external.google===false){ $('#signMsg').textContent='Google sign-in isn’t switched on yet. A grown-up needs to finish the set-up. For now, tap “Play without signing in”.'; return; } }catch(e){}
