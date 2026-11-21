@@ -205,6 +205,7 @@ canvas{display:block;width:100%;border-radius:20px;background:#1d1747;touch-acti
       <button class="subj" id="goHistory"><span class="emoji">🏰</span><div><b>History</b><span id="lvlHistory"></span></div><span class="go">▶</span></button>
       <button class="subj" id="goGeography"><span class="emoji">🗺️</span><div><b>Geography</b><span id="lvlGeography"></span></div><span class="go">▶</span></button>
       <button class="subj" id="goFrench"><span class="emoji">🇫🇷</span><div><b>French</b><span id="lvlFrench"></span></div><span class="go">▶</span></button>
+      <button class="subj" id="goSpanish"><span class="emoji">🇪🇸</span><div><b>Spanish</b><span id="lvlSpanish"></span></div><span class="go">▶</span></button>
       <button class="subj" id="goLife"><span class="emoji">💡</span><div><b>Computing, RE &amp; PSHE</b><span id="lvlLife"></span></div><span class="go">▶</span></button>
       <button class="subj" id="goSpelling"><span class="emoji">🔤</span><div><b>Spelling</b><span id="lvlSpelling"></span></div><span class="go">▶</span></button>
       <button class="subj" id="goWriting"><span class="emoji">✏️</span><div><b>Writing</b><span id="lvlWriting"></span></div><span class="go">▶</span></button>
@@ -414,6 +415,16 @@ function speak(text){
     const u=new SpeechSynthesisUtterance(text);
     u.lang='en-GB'; u.rate=0.9;
     const v=speechSynthesis.getVoices().find(v=>v.lang==='en-GB');
+    if(v) u.voice=v;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+/* say the English, then the foreign word/phrase in a native voice */
+function speakForeign(phrase, lang){
+  try{
+    if(!phrase||!('speechSynthesis' in window)) return;
+    const u=new SpeechSynthesisUtterance(phrase); u.lang=lang; u.rate=0.8;
+    const v=speechSynthesis.getVoices().find(v=>v.lang===lang)||speechSynthesis.getVoices().find(v=>v.lang&&v.lang.startsWith(lang.slice(0,2)));
     if(v) u.voice=v;
     speechSynthesis.speak(u);
   }catch(e){}
@@ -1576,7 +1587,9 @@ function buildBank(subject, unit, L, boost){
   const pool=units.flatMap(k=>S.units[k].q.map(x=>({x,k})));
   const pref=list=>{ const lvl=shuffle(list.filter(p=>p.x[0]===L)), lower=shuffle(list.filter(p=>p.x[0]<L)), higher=shuffle(list.filter(p=>p.x[0]>L)); return boost?[...lower,...lvl,...higher]:[...lvl,...lower,...higher]; };
   const fresh=pool.filter(p=>!isMastered(pre+p.x[1])), old=pool.filter(p=>isMastered(pre+p.x[1]));
-  return [...pref(fresh),...pref(old)].slice(0,10).map(({x:[,q,a,...o],k})=>{ const m=mc(q,a,o,{long:a.length>16||o.some(w=>w.length>16)}); m.item=pre+q; m.skill=pre+k; m.topic=subject+':'+k; return m; });
+  return [...pref(fresh),...pref(old)].slice(0,10).map(({x:[,q,a,...o],k})=>{ const m=mc(q,a,o,{long:a.length>16||o.some(w=>w.length>16)}); m.item=pre+q; m.skill=pre+k; m.topic=subject+':'+k;
+    if(subject==='french'||subject==='spanish'){ m.fl=subject==='french'?'fr-FR':'es-ES'; const mm=q.match(/“([^”]+)”/); m.flText=(mm&&!/^How do you say/.test(q))?mm[1]:''; }
+    return m; });
 }
 function buildReading(L, boost){
   const done=p=>p.q.every((_,i)=>isMastered('read:'+p.t+':'+i));
@@ -1833,6 +1846,109 @@ const LIFE2={
 };
 const LIFE_ORDER2=['comp2','re2','pshe2'];
 
+/* =========================================================
+   SPANISH (both years, extra language)
+   ========================================================= */
+const ES={
+ eshello:{name:'Hello & numbers',emoji:'👋',q:[
+  [1,'What does “hola” mean?','hello','goodbye','please','thank you'],
+  [1,'What does “adiós” mean?','goodbye','hello','yes','sorry'],
+  [1,'How do you say “thank you” in Spanish?','gracias','por favor','sí','hola'],
+  [1,'What is “uno” in English?','one','two','three','ten'],
+  [1,'How do you say “yes” in Spanish?','sí','no','oui','ja'],
+  [2,'What is “cinco” in English?','five','four','six','fifteen'],
+  [2,'What is “diez” in English?','ten','two','twelve','six'],
+  [2,'“Me llamo Koda” means…','My name is Koda','I like Koda','Koda is here','I live with Koda'],
+  [2,'“¿Cómo estás?” means…','How are you?','What is your name?','Where do you live?','How old are you?'],
+  [2,'What does “por favor” mean?','please','thank you','sorry','goodbye'],
+  [3,'What is “veinte” in English?','20','12','2','200'],
+  [3,'“Tengo ocho años” means…','I am eight years old','I have eight dogs','It is eight o’clock','I have eight friends'],
+  [3,'What is “quince” in English?','15','5','50','14'],
+  [3,'“Buenos días” means…','Good morning','Good night','Goodbye','Good luck'],
+  [3,'“¿Cuántos años tienes?” means…','How old are you?','How many dogs do you have?','What time is it?','Where are you?']]},
+ escolours:{name:'Colours & animals',emoji:'🐶',q:[
+  [1,'What colour is “rojo”?','red','blue','yellow','green'],
+  [1,'What colour is “azul”?','blue','red','white','black'],
+  [1,'What colour is “verde”?','green','grey','red','purple'],
+  [1,'What is “un perro”?','a dog','a cat','a bird','a fish'],
+  [1,'What is “un gato”?','a cat','a dog','a horse','a mouse'],
+  [2,'What colour is “amarillo”?','yellow','orange','brown','pink'],
+  [2,'What colour is “negro”?','black','white','brown','grey'],
+  [2,'What is “un pájaro”?','a bird','a fish','a rabbit','a horse'],
+  [2,'What is “un pez”?','a fish','a pig','a bee','a snake'],
+  [2,'What is “un caballo”?','a horse','a cow','a sheep','a goat'],
+  [3,'How do you say “a red dog” in Spanish?','un perro rojo','un rojo perro','una perro roja','el rojo perro'],
+  [3,'What colour is “blanco”?','white','black','blue','brown'],
+  [3,'What is “un conejo”?','a rabbit','a mouse','a frog','a duck'],
+  [3,'What colour is “rosa”?','pink','red','purple','orange'],
+  [3,'“Tengo un gato negro” means…','I have a black cat','I want a black dog','The cat is white','I like cats']]},
+ esfamily:{name:'Me & my family',emoji:'👨‍👩‍👧',q:[
+  [1,'What is “la madre” (or “mamá”)?','mum','dad','sister','grandma'],
+  [1,'What is “el padre” (or “papá”)?','dad','mum','brother','grandad'],
+  [1,'What is “el hermano”?','brother','sister','uncle','cousin'],
+  [1,'What is “la hermana”?','sister','brother','aunt','mum'],
+  [1,'What is “la abuela”?','grandma','grandad','aunt','baby'],
+  [2,'What is “el abuelo”?','grandad','grandma','uncle','dad'],
+  [2,'“Tengo un hermano” means…','I have a brother','I have a sister','I am a brother','I want a brother'],
+  [2,'“Mi familia” means…','my family','my friends','my house','my school'],
+  [2,'What is “la casa”?','the house','the car','the castle','the cake'],
+  [2,'“Vivo en Londres” means…','I live in London','I like London','London is big','I go to London'],
+  [3,'What is “el pelo”?','hair','feet','hands','eyes'],
+  [3,'What are “los ojos”?','eyes','ears','hands','legs'],
+  [3,'“Tengo los ojos azules” means…','I have blue eyes','I have blue hair','My eyes hurt','I like blue'],
+  [3,'What is “la cabeza”?','the head','the hand','the back','the knee'],
+  [3,'“Soy alto” means…','I am tall','I am happy','I am small','I am old']]},
+ esfood:{name:'Food & drink',emoji:'🍎',q:[
+  [1,'What is “una manzana”?','an apple','a banana','an orange','a pear'],
+  [1,'What is “el agua”?','water','milk','juice','tea'],
+  [1,'What is “la leche”?','milk','lemon','lettuce','bread'],
+  [1,'What is “el pan”?','bread','a pan','pasta','cake'],
+  [1,'What is “un plátano”?','a banana','a plate','a potato','a pineapple'],
+  [2,'What is “el queso”?','cheese','ham','eggs','butter'],
+  [2,'What is “un helado”?','an ice cream','a hello','a biscuit','a sweet'],
+  [2,'“Me gusta el chocolate” means…','I like chocolate','I want chocolate','I hate chocolate','I made chocolate'],
+  [2,'“No me gusta” means…','I don’t like it','I like it','I love it','I want it'],
+  [2,'What is “una naranja”?','an orange','a banana','a carrot','a lemon'],
+  [3,'“Quiero agua, por favor” means…','I want water, please','I like water','Water is cold','Thank you for the water'],
+  [3,'What is “el pollo”?','chicken','fish','pork','beef'],
+  [3,'What is “la sopa”?','soup','soap','salad','sauce'],
+  [3,'What is “el desayuno”?','breakfast','lunch','dinner','dessert'],
+  [3,'“Tengo hambre” means…','I am hungry','I am thirsty','I am tired','I am cold']]},
+ esschool:{name:'At school',emoji:'🏫',q:[
+  [1,'What is “un lápiz”?','a pencil','a lamp','a book','a ruler'],
+  [1,'What is “un libro”?','a book','a library','a pen','a bag'],
+  [1,'What is “la escuela” (or “el colegio”)?','school','the teacher','homework','the classroom'],
+  [1,'What is “el profesor” / “la profesora”?','the teacher','the head teacher','the pupil','the cook'],
+  [1,'What is “una mesa”?','a table','a mess','a chair','a mat'],
+  [2,'What is “una silla”?','a chair','a table','a door','a window'],
+  [2,'What is “una regla”?','a ruler','a rule book','a rubber','a rug'],
+  [2,'What is “la mochila”?','the school bag','the pencil case','the lunchbox','the coat'],
+  [2,'What does “¡Silencio!” mean?','Quiet!','Stand up!','Sit down!','Listen!'],
+  [2,'What does “Siéntate” mean?','Sit down','Stand up','Be quiet','Look'],
+  [3,'What are “las matemáticas”?','maths','music','art','science'],
+  [3,'What is “la goma”?','the rubber','the glue','the game','the pen'],
+  [3,'“Me gusta el inglés” means…','I like English','I speak English','I am English','English is hard'],
+  [3,'What is “el recreo”?','playtime','recorder','reading','homework'],
+  [3,'What is “la pizarra”?','the board','the pizza','the paper','the paint']]},
+ esweather:{name:'Days & weather',emoji:'🌦️',q:[
+  [1,'“Hace sol” means…','It is sunny','It is snowing','It is raining','It is windy'],
+  [1,'“Hace frío” means…','It is cold','It is hot','It is sunny','It is foggy'],
+  [1,'“Hace calor” means…','It is hot','It is cold','It is raining','It is cloudy'],
+  [1,'“Llueve” means…','It is raining','It is snowing','It is windy','It is night'],
+  [1,'What is “lunes”?','Monday','Tuesday','moon','Sunday'],
+  [2,'“Nieva” means…','It is snowing','It is raining','It is sunny','It is hot'],
+  [2,'“Hace viento” means…','It is windy','It is warm','It is wet','It is foggy'],
+  [2,'What is “sábado”?','Saturday','Sunday','Friday','Monday'],
+  [2,'What is “domingo”?','Sunday','Saturday','Monday','Thursday'],
+  [2,'What is “el invierno”?','winter','summer','spring','autumn'],
+  [3,'What is “el verano”?','summer','winter','spring','autumn'],
+  [3,'“¿Qué tiempo hace?” means…','What is the weather like?','What time is it?','What day is it?','How are you?'],
+  [3,'What is “miércoles”?','Wednesday','Thursday','Tuesday','Friday'],
+  [3,'“Hoy es viernes” means…','Today is Friday','Tomorrow is Friday','Yesterday was Friday','It is Friday night'],
+  [3,'What is “la primavera”?','spring','summer','the first','winter']]}
+};
+const ES_ORDER=['eshello','escolours','esfamily','esfood','esschool','esweather'];
+
 /* ---------- which year is playing ---------- */
 let LIFE=LIFE4, LIFE_ORDER=LIFE_ORDER4;
 let HIS=HIS4, HIS_ORDER=HIS_ORDER4, GEO=GEO4, GEO_ORDER=GEO_ORDER4, READ=READ4;
@@ -1849,13 +1965,14 @@ const SUBJECTS={
   geography:{name:'Geography',emoji:'🗺️',max:3,units:GEO,order:GEO_ORDER},
   reading:{name:'Reading',emoji:'📖',max:3},
   french:{name:'French',emoji:'🇫🇷',max:3,units:FR4,order:FR_ORDER4},
+  spanish:{name:'Spanish',emoji:'🇪🇸',max:3,units:ES,order:ES_ORDER},
   life:{name:'Computing, RE & PSHE',emoji:'💡',max:3,units:LIFE,order:LIFE_ORDER},
   spelling:{name:'Spelling',emoji:'🔤',max:3},
   writing:{name:'Writing',emoji:'✏️',max:3},
   mtc:{name:'Times Tables Check',emoji:'⏱',max:0}
 };
 const qKey=(subject,unit)=>unit?subject+':'+unit:subject;
-function unitName(subject,unit){ if(!unit) return ''; if(unit==='mixed') return 'Mixed'; const u=((SUBJECTS[subject]||{}).units||{})[unit]||MU4[unit]||MU2[unit]||SCI4[unit]||SCI2[unit]||HIS4[unit]||HIS2[unit]||GEO4[unit]||GEO2[unit]||FR4[unit]||LIFE4[unit]||LIFE2[unit]; return u?u.name:unit; }
+function unitName(subject,unit){ if(!unit) return ''; if(unit==='mixed') return 'Mixed'; const u=((SUBJECTS[subject]||{}).units||{})[unit]||MU4[unit]||MU2[unit]||SCI4[unit]||SCI2[unit]||HIS4[unit]||HIS2[unit]||GEO4[unit]||GEO2[unit]||FR4[unit]||ES[unit]||LIFE4[unit]||LIFE2[unit]; return u?u.name:unit; }
 function setYear(y){
   YEAR = y===2 ? 2 : 4;
   const two = YEAR===2;
@@ -1879,7 +1996,7 @@ function buildTest(subject, unit, level, boost){
   if(subject==='mtc') return buildMTC();
   const key=qKey(subject,unit), rev=reviewFor(key, boost?1:3);
   let qs;
-  if(subject==='history'||subject==='geography'||subject==='french'||subject==='life'){ qs=buildBank(subject, unit, Math.min(level,3), boost).filter(q=>!rev.some(r=>r.item===q.item)).slice(0,10-rev.length); }
+  if(subject==='history'||subject==='geography'||subject==='french'||subject==='spanish'||subject==='life'){ qs=buildBank(subject, unit, Math.min(level,3), boost).filter(q=>!rev.some(r=>r.item===q.item)).slice(0,10-rev.length); }
   else if(subject==='reading'){ return buildReading(Math.min(level,3), boost); }
   else if(subject==='science'){ qs=buildScience(unit, Math.min(level,3), boost).filter(q=>!rev.some(r=>r.item===q.item)).slice(0,10-rev.length); }
   else {
@@ -1973,6 +2090,7 @@ function renderHome(){
   $('#lvlSpelling').textContent=levelLabel(getLevel('spelling'),3);
   $('#lvlReading').textContent=levelLabel(getLevel('reading'),3)+' · short stories and facts';
   $('#goFrench').style.display=YEAR===4?'':'none'; $('#lvlFrench').textContent=FR_ORDER4.length+' topics · from your school’s plan';
+  $('#lvlSpanish').textContent=ES_ORDER.length+' topics · extra language';
   $('#lvlLife').textContent='Online safety, faiths & festivals, healthy & safe';
   $('#lvlHistory').textContent=HIS_ORDER.length+' topics'; $('#lvlGeography').textContent=GEO_ORDER.length+' topics';
   $('#lvlWriting').textContent=levelLabel(getLevel('writing'),3);
@@ -2679,6 +2797,7 @@ $('#goScience').onclick=()=>renderTopics('science');
 $('#goSpelling').onclick=()=>startTest('spelling');
 $('#goWriting').onclick=()=>startTest('writing');
 $('#goFrench').onclick=()=>renderTopics('french');
+$('#goSpanish').onclick=()=>renderTopics('spanish');
 $('#goLife').onclick=()=>renderTopics('life');
 $('#goReading').onclick=()=>startTest('reading');
 $('#goHistory').onclick=()=>renderTopics('history');
@@ -2701,7 +2820,7 @@ document.addEventListener('keydown',e=>{
 $('#pickerHome').onclick=renderHome;
 $('#nextBtn').onclick=next;
 $('#quitQuiz').onclick=()=>{ clearTimeout(qTimer); renderHome(); };
-$('#sayBtn').onclick=()=>{ const q=cur&&cur.qs[cur.i]; if(q) speak(cur.subject==='spelling'||q.type==='input' ? q.say : q.say + '. Is it: '+q.options.join(', or ')+'?'); };
+$('#sayBtn').onclick=()=>{ const q=cur&&cur.qs[cur.i]; if(!q) return; speak(cur.subject==='spelling'||q.type==='input' ? q.say : q.say + '. Is it: '+q.options.join(', or ')+'?'); if(q.fl&&q.flText) speakForeign(q.flText,q.fl); };
 try{ speechSynthesis.getVoices(); }catch(e){}
 
 /* ---------- sign in, players ---------- */
