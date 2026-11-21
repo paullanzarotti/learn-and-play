@@ -2846,7 +2846,7 @@ const bricks={name:'Brick Breaker',emoji:'🧱',desc:'Smash all the bricks',
 /* ---------- 9. Burger Builder (replaces Fruit Catcher) ---------- */
 const BURGER=['bunB','patty','cheese','lettuce','tomato','bunT'];
 const B_NAME={bunB:'bottom bun',patty:'burger',cheese:'cheese',lettuce:'lettuce',tomato:'tomato',bunT:'top bun'};
-const B_JUNK=['👟','🧦','🐟','🧸'];
+const B_JUNK=['sausage','egg','pickle']; const B_JUNK_NAME={sausage:'Mr Sausage',egg:'Mr Egg',pickle:'Mr Pickle'};
 function drawIng(c,k,x,y,w){
   const h=w*0.22;
   if(k==='bunB'){ c.fillStyle='#e0a050'; rr(c,x-w/2,y-h/2,w,h,h*0.45); c.fill(); }
@@ -2857,28 +2857,28 @@ function drawIng(c,k,x,y,w){
   else if(k==='bunT'){ c.fillStyle='#e0a050'; c.beginPath(); c.moveTo(x-w/2,y+h*0.5); c.quadraticCurveTo(x-w/2,y-h*1.4,x,y-h*1.4); c.quadraticCurveTo(x+w/2,y-h*1.4,x+w/2,y+h*0.5); c.closePath(); c.fill(); c.fillStyle='#fff6d6'; for(let i=0;i<6;i++){ c.beginPath(); c.ellipse(x-w*0.3+i*w*0.12,y-h*(0.55+((i*7)%3)*0.2),w*0.025,h*0.1,0.4,0,7); c.fill(); } }
 }
 const burger={name:'Burger Builder',emoji:'🍔',desc:'Catch the ingredients in order',
-  how:'Catch the ingredients in the right order to build a burger: bottom bun, burger, cheese, lettuce, tomato, top bun. Each burger is worth +5! Missing the ingredient you need, or catching junk like 👟, costs a heart. You have 3 hearts.',
+  how:'Catch the ingredients in the right order to build a burger: bottom bun, burger, cheese, lettuce, tomato, top bun. Each burger is worth +5! Missing the ingredient you need, or catching the cheeky baddies (Mr Sausage, Mr Egg and Mr Pickle), costs a heart. You have 3 hearts.',
   controls:'lr',lives:3,bg:'#ffe9c7',lvlStep:15,
   hud3:g=>livesStr(g)+' 🍔'+g.made,
-  init(g){ g.tray={w:g.W*0.3,x:g.W/2}; g.trayY=g.H-28; g.stack=[]; g.items=[]; g.spawn=0.6; g.made=0; g.iw=g.W*0.24; },
+  init(g){ g.tray={w:g.W*0.3,x:g.W/2}; g.chefH=Math.min(g.tray.w*1.05,g.H*0.24); g.trayY=g.H-g.chefH-g.H*0.03; g.stack=[]; g.items=[]; g.spawn=0.6; g.made=0; g.iw=g.W*0.24; },
   need(g){ return BURGER[g.stack.length]; },
-  move(g,dt){ lrMove(g,g.tray,dt,1.6); },
+  move(g,dt){ lrMove(g,g.tray,dt,2.1); },
   update(g,dt,now){
     burger.move(g,dt); g.spawn-=dt;
-    const sp=g.H*(0.22+Math.min(g.lvl-1,8)*0.03);
+    const sp=g.H*(0.30+Math.min(g.lvl-1,8)*0.035);
     if(g.spawn<=0){
-      g.spawn=Math.max(0.55,1.25-Math.min(g.lvl-1,8)*0.08);
+      g.spawn=Math.max(0.42,1.0-Math.min(g.lvl-1,8)*0.07);
       const need=burger.need(g), hasNeed=g.items.some(i=>i.k===need), r=Math.random();
       let k; if(!hasNeed && r<0.65) k=need; else if(r<0.82+Math.min(g.lvl,6)*0.01) k=pick(BURGER.filter(b=>b!==need)); else k='junk';
-      g.items.push({k,e:k==='junk'?pick(B_JUNK):'',x:g.iw/2+Math.random()*(g.W-g.iw),y:-20,v:sp*(0.9+Math.random()*0.25)});
+      g.items.push({k,e:k==='junk'?pick(B_JUNK):'',x:g.iw/2+Math.random()*(g.W-g.iw),y:-20,v:sp*(0.9+Math.random()*0.25),ph:Math.random()*6,sway:k==='junk'?g.W*0.05:0});
     }
     const topY=g.trayY-g.stack.length*g.iw*0.2;
     for(let i=g.items.length-1;i>=0;i--){
-      const it=g.items[i]; it.y+=it.v*dt;
+      const it=g.items[i]; it.y+=it.v*dt; if(it.sway){ it.x+=Math.cos(now/300+it.ph)*it.sway*dt*3; it.x=Math.max(g.iw/2,Math.min(g.W-g.iw/2,it.x)); }
       if(it.y>=topY-12 && it.y<=topY+14 && Math.abs(it.x-g.tray.x)<g.tray.w/2){
         g.items.splice(i,1);
-        if(it.k==='junk'){ g.flash={text:'Yuck! '+it.e,until:now+700}; if(lose(g)) return; continue; }
-        if(it.k===burger.need(g)){ g.stack.push(it.k); point(g); beep(700+g.stack.length*80,.07,'triangle');
+        if(it.k==='junk'){ g.flash={text:'Yuck! '+B_JUNK_NAME[it.e]+' got you!',until:now+800}; g.wobble=now; if(lose(g)) return; continue; }
+        if(it.k===burger.need(g)){ g.stack.push(it.k); g.squash=now; point(g); beep(700+g.stack.length*80,.07,'triangle');
           if(g.stack.length===BURGER.length){ g.made++; point(g,5); g.flash={text:'Burger! +5 🍔',until:now+900}; happy(); g.doneAt=now+700; }
         } else { beep(300,.08,'square'); }
         continue;
@@ -2888,15 +2888,81 @@ const burger={name:'Burger Builder',emoji:'🍔',desc:'Catch the ingredients in 
     if(g.doneAt && now>=g.doneAt){ g.stack=[]; g.doneAt=0; }
   },
   draw(g,c){
-    c.fillStyle='#fff7e8'; for(let i=0;i<6;i++){ c.fillRect(0,i*g.H/6,g.W,g.H/12); }
+    drawKitchen(c,g);
     const need=burger.need(g);
-    c.fillStyle='#2b2559'; c.font=`800 ${Math.round(g.W*0.045)}px system-ui,sans-serif`; c.textAlign='left'; c.textBaseline='top';
-    if(need) c.fillText('Next: '+B_NAME[need],10,8);
-    for(const it of g.items){ if(it.k==='junk') emo(c,it.e,it.x,it.y,g.iw*0.55); else { drawIng(c,it.k,it.x,it.y,g.iw); if(it.k===need){ c.strokeStyle='rgba(255,95,162,.7)'; c.lineWidth=3; c.beginPath(); c.arc(it.x,it.y,g.iw*0.62,0,7); c.stroke(); } } }
-    c.fillStyle='#b8c4d6'; rr(c,g.tray.x-g.tray.w/2,g.trayY+6,g.tray.w,10,5); c.fill();
-    g.stack.forEach((k,i)=>drawIng(c,k,g.tray.x,g.trayY-i*g.iw*0.2,g.iw*1.1));
+    c.font=`800 ${Math.round(g.W*0.045)}px system-ui,sans-serif`; c.textAlign='left'; c.textBaseline='top';
+    if(need){ const t='Next: '+B_NAME[need], tw=c.measureText(t).width; c.fillStyle='rgba(255,255,255,.88)'; rr(c,6,5,tw+12,g.W*0.045+8,8); c.fill(); c.fillStyle='#2b2559'; c.fillText(t,12,9); }
+    const T=performance.now(); for(const it of g.items){ if(it.k==='junk') drawBaddie(c,it.e,it.x,it.y,g.iw*0.42,T/1000+it.ph); else { c.save(); c.translate(it.x,it.y); c.rotate(Math.sin(T/260+it.ph)*0.12); drawIng(c,it.k,0,0,g.iw); c.restore(); if(it.k===need){ c.strokeStyle='rgba(255,95,162,.7)'; c.lineWidth=3; c.beginPath(); c.arc(it.x,it.y,g.iw*0.62,0,7); c.stroke(); } } }
+    drawChef(c,g);
+    { const sq=Math.max(0,1-(T-(g.squash||0))/220), wob=Math.max(0,1-(T-(g.wobble||0))/500); c.save(); c.translate(g.tray.x,g.trayY); c.rotate(Math.sin(T/40)*0.08*wob); c.scale(1+sq*0.12,1-sq*0.1); g.stack.forEach((k,i)=>drawIng(c,k,0,-i*g.iw*0.2,g.iw*1.1)); c.restore(); }
   }
 };
+
+/* kitchen backdrop + the chef who carries the plate (original character) */
+function drawBaddie(c,type,x,y,r,t){
+  c.save(); c.translate(x,y); c.rotate(Math.sin(t*5)*0.15);
+  if(type==='sausage'){ c.fillStyle='#c0603a'; rr(c,-r*0.35,-r*0.8,r*0.7,r*1.6,r*0.35); c.fill(); c.fillStyle='#e48a5c'; rr(c,-r*0.2,-r*0.65,r*0.15,r*1.2,r*0.08); c.fill(); }
+  else if(type==='egg'){ c.fillStyle='#fff'; c.beginPath(); for(let a=0;a<6.3;a+=0.5){ const rr2=r*(0.8+0.12*Math.sin(a*3)); c.lineTo(Math.cos(a)*rr2,Math.sin(a)*rr2); } c.fill(); c.fillStyle='#ffc627'; c.beginPath(); c.arc(0,r*0.25,r*0.35,0,7); c.fill(); }
+  else { c.fillStyle='#5fa83a'; c.beginPath(); c.ellipse(0,0,r*0.38,r*0.8,0,0,7); c.fill(); c.fillStyle='#3e7d22'; for(let i=-2;i<=2;i++){ c.beginPath(); c.arc(r*0.12*(i%2),i*r*0.28,r*0.05,0,7); c.fill(); } }
+  const ey=type==='egg'?-r*0.25:-r*0.3, blink=Math.sin(t*2)>0.97;
+  c.fillStyle='#fff'; c.beginPath(); c.arc(-r*0.15,ey,r*0.14,0,7); c.arc(r*0.15,ey,r*0.14,0,7); c.fill();
+  c.fillStyle='#2b2559'; if(blink){ c.fillRect(-r*0.27,ey-1,r*0.24,2); c.fillRect(r*0.03,ey-1,r*0.24,2); } else { c.beginPath(); c.arc(-r*0.13+Math.sin(t*3)*r*0.04,ey,r*0.07,0,7); c.arc(r*0.17+Math.sin(t*3)*r*0.04,ey,r*0.07,0,7); c.fill(); }
+  c.strokeStyle='#2b2559'; c.lineWidth=2; c.beginPath(); c.moveTo(-r*0.28,ey-r*0.2); c.lineTo(-r*0.05,ey-r*0.12); c.moveTo(r*0.28,ey-r*0.2); c.lineTo(r*0.05,ey-r*0.12); c.stroke();
+  c.beginPath(); c.arc(0,ey+r*0.32,r*0.12,Math.PI+0.3,-0.3); c.stroke();
+  c.restore();
+}
+function drawKitchen(c,g){
+  const W=g.W,H=g.H, t=Math.max(18,W/12);
+  c.fillStyle='#eaf6f6'; c.fillRect(0,0,W,H);
+  c.strokeStyle='#cfe6e6'; c.lineWidth=2;
+  for(let y=0;y<H;y+=t){ c.beginPath(); c.moveTo(0,y); c.lineTo(W,y); c.stroke(); }
+  for(let x=0;x<W;x+=t){ c.beginPath(); c.moveTo(x,0); c.lineTo(x,H*0.62); c.stroke(); }
+  // window with sky
+  const wx=W*0.62, wy=H*0.08, ww=W*0.3, wh=H*0.18;
+  c.fillStyle='#8a5a3b'; rr(c,wx-6,wy-6,ww+12,wh+12,8); c.fill();
+  c.fillStyle='#bfe6ff'; c.fillRect(wx,wy,ww,wh); c.fillStyle='#fff'; c.beginPath(); c.arc(wx+ww*0.3,wy+wh*0.6,wh*0.18,0,7); c.arc(wx+ww*0.45,wy+wh*0.5,wh*0.22,0,7); c.fill();
+  c.fillStyle='#8a5a3b'; c.fillRect(wx+ww/2-3,wy,6,wh); c.fillRect(wx,wy+wh/2-3,ww,6);
+  // shelf with jars & pans
+  const sy=H*0.36; c.fillStyle='#a8714c'; c.fillRect(W*0.05,sy,W*0.5,8);
+  emo(c,'🫙',W*0.12,sy-14,24); emo(c,'🧂',W*0.24,sy-12,20); emo(c,'🍯',W*0.36,sy-13,22); emo(c,'🥫',W*0.48,sy-12,20);
+  c.strokeStyle='#777'; c.lineWidth=2; c.beginPath(); c.moveTo(W*0.08,H*0.12); c.lineTo(W*0.5,H*0.12); c.stroke();
+  emo(c,'🍳',W*0.16,H*0.17,26); emo(c,'🥄',W*0.29,H*0.17,22); emo(c,'🔪',W*0.4,H*0.17,20);
+  // lower cupboards and worktop
+  const cy=H*0.62; c.fillStyle='#ffd9a8'; c.fillRect(0,cy,W,H-cy);
+  c.strokeStyle='#e8b67a'; c.lineWidth=3; for(let x=W*0.02;x<W;x+=W/4){ rr(c,x,cy+H*0.05,W/4-W*0.04,H-cy-H*0.08,8); c.stroke(); c.fillStyle='#c48a4a'; c.beginPath(); c.arc(x+W/8-W*0.02,cy+H*0.15,4,0,7); c.fill(); }
+  c.fillStyle='#9b6a45'; c.fillRect(0,cy-8,W,14);
+  // stove with steam
+  c.fillStyle='#555'; rr(c,W*0.66,cy-16,W*0.26,10,4); c.fill();
+  emo(c,'🍲',W*0.79,cy-30,30);
+}
+function drawChef(c,g){
+  const x=g.tray.x, u=g.chefH, top=g.trayY+8, bob=Math.sin(performance.now()/120)*(g.keys&&(g.keys.left||g.keys.right)?2:0.6);
+  const headR=u*0.17, hatY=top+u*0.16+bob, headY=hatY+u*0.17;
+  // arms up holding the plate
+  c.strokeStyle='#ffffff'; c.lineWidth=u*0.09; c.lineCap='round';
+  c.beginPath(); c.moveTo(x-u*0.22,headY+u*0.32); c.lineTo(x-g.tray.w*0.42,top+u*0.06); c.moveTo(x+u*0.22,headY+u*0.32); c.lineTo(x+g.tray.w*0.42,top+u*0.06); c.stroke();
+  c.strokeStyle='#d9e2ee'; c.lineWidth=2; c.stroke();
+  c.fillStyle='#ffd7b5'; c.beginPath(); c.arc(x-g.tray.w*0.43,top+u*0.05,u*0.055,0,7); c.arc(x+g.tray.w*0.43,top+u*0.05,u*0.055,0,7); c.fill();
+  // body: white chef's jacket with buttons
+  c.fillStyle='#ffffff'; c.strokeStyle='#c9d3e0'; c.lineWidth=2; rr(c,x-u*0.27,headY+u*0.2,u*0.54,u*0.44,u*0.12); c.fill(); c.stroke();
+  c.fillStyle='#4ab0ff'; for(let i=0;i<3;i++){ c.beginPath(); c.arc(x,headY+u*0.34+i*u*0.09,u*0.022,0,7); c.fill(); }
+  // spotty neckerchief
+  c.fillStyle='#ff9f43'; c.beginPath(); c.moveTo(x-u*0.14,headY+u*0.17); c.lineTo(x+u*0.14,headY+u*0.17); c.lineTo(x,headY+u*0.3); c.fill();
+  // head
+  c.fillStyle='#ffd7b5'; c.beginPath(); c.arc(x,headY,headR,0,7); c.fill();
+  c.fillStyle='#ff9aa8'; c.beginPath(); c.arc(x-headR*0.55,headY+headR*0.25,headR*0.2,0,7); c.arc(x+headR*0.55,headY+headR*0.25,headR*0.2,0,7); c.fill();
+  c.fillStyle='#2b2559'; c.beginPath(); c.arc(x-headR*0.35,headY-headR*0.1,headR*0.11,0,7); c.arc(x+headR*0.35,headY-headR*0.1,headR*0.11,0,7); c.fill();
+  // big curly ginger moustache + smile
+  c.fillStyle='#c8642a'; c.beginPath(); c.ellipse(x-headR*0.28,headY+headR*0.28,headR*0.32,headR*0.15,-0.3,0,7); c.ellipse(x+headR*0.28,headY+headR*0.28,headR*0.32,headR*0.15,0.3,0,7); c.fill();
+  c.strokeStyle='#b0303a'; c.lineWidth=2; c.beginPath(); c.arc(x,headY+headR*0.45,headR*0.25,0.2,Math.PI-0.2); c.stroke();
+  // tall puffy chef's hat
+  c.fillStyle='#ffffff'; c.strokeStyle='#c9d3e0'; c.lineWidth=2;
+  c.fillRect(x-headR*0.8,hatY-headR*0.1,headR*1.6,headR*0.55); c.strokeRect(x-headR*0.8,hatY-headR*0.1,headR*1.6,headR*0.55);
+  c.beginPath(); c.arc(x-headR*0.55,hatY-headR*0.35,headR*0.45,0,7); c.arc(x+headR*0.55,hatY-headR*0.35,headR*0.45,0,7); c.arc(x,hatY-headR*0.6,headR*0.55,0,7); c.fill();
+  // the plate
+  c.fillStyle='#ffffff'; c.strokeStyle='#9fb0c8'; c.lineWidth=3; c.beginPath(); c.ellipse(x,g.trayY+10,g.tray.w/2,9,0,0,7); c.fill(); c.stroke();
+  c.strokeStyle='#d9e2ee'; c.lineWidth=2; c.beginPath(); c.ellipse(x,g.trayY+10,g.tray.w*0.32,5,0,0,7); c.stroke();
+}
 
 /* ---------- 10. Maze Muncher (maze chase) ---------- */
 const MAZE=[
@@ -2967,9 +3033,9 @@ const muncher={name:'Maze Muncher',emoji:'🐹',desc:'Eat the seeds, dodge the c
   }
 };
 
-/* ---------- 11. Coconut Climb (climb to the top, jump the coconuts) ---------- */
-const climb={name:'Coconut Climb',emoji:'🐵',desc:'Climb up, jump the coconuts',
-  how:'Run along the platforms and climb the ladders to reach the trophy 🏆 at the top. The monkey rolls coconuts 🥥 – press Jump to leap over them (+1 each). Each climb is +10. Use ◀ ▶ to run, ▲ ▼ on ladders. You have 3 lives.',
+/* ---------- 11. Gorilla Climb (climb to the top, jump the coconuts) ---------- */
+const climb={name:'Gorilla Climb',emoji:'🦍',desc:'Climb up, jump the gorilla’s coconuts',
+  how:'Run along the platforms and climb the ladders to reach the trophy 🏆 at the top. The grumpy gorilla 🦍 rolls coconuts 🥥 – press Jump to leap over them (+1 each). Each climb is +10. Use ◀ ▶ to run, ▲ ▼ on ladders. You have 3 lives.',
   controls:'climb',lives:3,bg:'#1e2a5a',noUpAction:true,
   init(g){ g.lvl=1; climb.level(g); },
   level(g){
@@ -2994,7 +3060,7 @@ const climb={name:'Coconut Climb',emoji:'🐵',desc:'Climb up, jump the coconuts
     }
     if(p.lv===g.plats.length-1 && !p.climb && p.x>g.W*0.75){ point(g,10); g.lvl++; g.flash={text:`Top! +10 · Level ${g.lvl}`,until:now+1300}; happy(); climb.level(g); g.pauseUntil=now+1300; return; }
     g.nt-=dt;
-    if(g.nt<=0){ g.nt=Math.max(1.1,2.6-0.2*(g.lvl-1))*(0.8+Math.random()*0.4); const top=g.plats.length-1; g.nuts.push({x:g.W*0.12,lv:top,y:g.plats[top],dir:1,v:g.W*(0.3+0.03*Math.min(g.lvl,8)),fall:false,jumped:false}); }
+    if(g.nt<=0){ g.nt=Math.max(1.1,2.6-0.2*(g.lvl-1))*(0.8+Math.random()*0.4); const top=g.plats.length-1; g.throwAt=performance.now(); g.nuts.push({x:g.W*0.12,lv:top,y:g.plats[top],dir:1,v:g.W*(0.3+0.03*Math.min(g.lvl,8)),fall:false,jumped:false}); }
     for(let i=g.nuts.length-1;i>=0;i--){
       const n=g.nuts[i];
       if(n.fall){ n.y+=g.ph*3*dt; if(n.y>=g.plats[n.lv]){ n.y=g.plats[n.lv]; n.fall=false; n.dir=-n.dir; } }
@@ -3012,7 +3078,7 @@ const climb={name:'Coconut Climb',emoji:'🐵',desc:'Climb up, jump the coconuts
     for(const L of g.ladders){ const y1=g.plats[L.from], y2=g.plats[L.from+1]; c.strokeStyle='#7cf2b0'; c.lineWidth=3; c.beginPath(); c.moveTo(L.x-8,y1); c.lineTo(L.x-8,y2); c.moveTo(L.x+8,y1); c.lineTo(L.x+8,y2); for(let y=y2+8;y<y1;y+=12){ c.moveTo(L.x-8,y); c.lineTo(L.x+8,y); } c.stroke(); }
     g.plats.forEach(y=>{ c.fillStyle='#ff5fa2'; c.fillRect(0,y,g.W,8); c.fillStyle='#c23e7d'; for(let x=0;x<g.W;x+=18) c.fillRect(x,y+2,9,4); });
     const top=g.plats[g.plats.length-1];
-    emo(c,'🐵',g.W*0.07,top-g.pw*0.6,g.pw*1.5); emo(c,'🏆',g.W*0.92,top-g.pw*0.55,g.pw*1.2);
+    { const th=Math.max(0,1-(performance.now()-(g.throwAt||0))/350), beat=Math.sin(performance.now()/160)*0.04; c.save(); c.translate(g.W*0.11,top-g.pw*0.85); c.scale(1+beat+th*0.18,1-beat+th*0.12); c.rotate(-th*0.25); emo(c,'🦍',0,0,g.pw*2.1); c.restore(); } emo(c,'🏆',g.W*0.92,top-g.pw*0.55,g.pw*1.2);
     for(const n of g.nuts) emo(c,'🥥',n.x,n.y-g.pw*0.4,g.pw*0.85);
     const p=g.pl; c.save(); c.translate(p.x,p.y-g.pw*0.55); if(p.face<0) c.scale(-1,1); emo(c,'🧒',0,0,g.pw*1.2); c.restore();
   }
@@ -3072,9 +3138,30 @@ const skypatrol={name:'Sky Patrol',emoji:'✈️',desc:'Fly and zap the storm cl
     c.fillStyle='rgba(255,255,255,.85)'; for(const k of g.cl){ c.beginPath(); c.ellipse(k.x,k.y,50*k.s,18*k.s,0,0,7); c.fill(); }
     c.fillStyle='#ffd23f'; for(const s of g.shots){ rr(c,s.x-8,s.y-2,14,4,2); c.fill(); }
     for(const f of g.foes) emo(c,f.type==='star'?'⭐':f.type==='bat'?'🦇':'⛈️',f.x,f.y,f.s*2);
-    const p=g.pl; if(!(t<g.inv&&Math.floor(t/120)%2)) emo(c,'✈️',p.x,p.y,p.h);
+    const p=g.pl; if(!(t<g.inv&&Math.floor(t/120)%2)) drawPlane(c,p.x,p.y,p.h,t,(g.keys.up?-1:0)+(g.keys.down?1:0)+(g.targetY!=null?Math.max(-1,Math.min(1,(g.targetY-p.y)/40)):0));
   }
 };
+
+/* side-on propeller plane, nose pointing right */
+function drawPlane(c,x,y,h,t,tilt){
+  const L=h*1.7, R=h*0.32;
+  c.save(); c.translate(x,y+Math.sin(t/300)*2); c.rotate((tilt||0)*0.22);
+  // tail fin + tailplane
+  c.fillStyle='#d6336c'; c.beginPath(); c.moveTo(-L*0.5,-R*0.2); c.lineTo(-L*0.62,-R*2.1); c.lineTo(-L*0.36,-R*2.1); c.lineTo(-L*0.22,-R*0.6); c.fill();
+  c.fillStyle='#b02a5a'; rr(c,-L*0.66,-R*0.25,L*0.3,R*0.5,R*0.25); c.fill();
+  // fuselage
+  c.fillStyle='#ff5fa2'; c.beginPath(); c.moveTo(-L*0.55,-R*0.35); c.quadraticCurveTo(-L*0.1,-R*1.25,L*0.3,-R); c.quadraticCurveTo(L*0.55,-R*0.8,L*0.55,0); c.quadraticCurveTo(L*0.55,R,L*0.25,R); c.quadraticCurveTo(-L*0.2,R*1.05,-L*0.55,R*0.2); c.closePath(); c.fill();
+  c.fillStyle='#fff'; c.beginPath(); c.moveTo(-L*0.5,R*0.05); c.quadraticCurveTo(0,R*0.35,L*0.54,R*0.1); c.quadraticCurveTo(L*0.5,R,L*0.25,R); c.quadraticCurveTo(-L*0.2,R*1.05,-L*0.55,R*0.2); c.closePath(); c.fill();
+  // cockpit with pilot
+  c.fillStyle='#bfe9ff'; c.strokeStyle='#2b2559'; c.lineWidth=1.5; c.beginPath(); c.moveTo(-L*0.02,-R*1.05); c.quadraticCurveTo(L*0.12,-R*2,L*0.3,-R*0.98); c.closePath(); c.fill(); c.stroke();
+  c.fillStyle='#ffd7b5'; c.beginPath(); c.arc(L*0.13,-R*1.2,R*0.3,0,7); c.fill(); c.fillStyle='#2b2559'; c.beginPath(); c.arc(L*0.17,-R*1.25,R*0.07,0,7); c.fill();
+  // wing
+  c.fillStyle='#ffd23f'; c.strokeStyle='#d9a400'; c.lineWidth=1.5; c.beginPath(); c.moveTo(-L*0.08,R*0.15); c.lineTo(L*0.22,R*0.15); c.lineTo(L*0.02,R*1.7); c.lineTo(-L*0.2,R*1.7); c.closePath(); c.fill(); c.stroke();
+  // nose cone + spinning propeller
+  c.fillStyle='#2b2559'; c.beginPath(); c.arc(L*0.56,0,R*0.3,0,7); c.fill();
+  const pr=Math.abs(Math.sin(t/28))*R*1.7+R*0.3; c.fillStyle='rgba(60,60,80,.55)'; c.beginPath(); c.ellipse(L*0.6,0,R*0.13,pr,0,0,7); c.fill();
+  c.restore();
+}
 
 /* ---------- 14. Penalty Shoot-Out ---------- */
 const penalty={name:'Penalty Shoot-Out',emoji:'⚽',desc:'Beat the goalkeeper',
@@ -3155,14 +3242,17 @@ function openGame(id){
   show('game');
   const cv=$('#pong');
   g={id,def,cv,ctx:cv.getContext('2d'),score:0,lvl:1,lives:def.lives||0,time:def.time||0,phase:'intro',keys:{left:false,right:false,up:false,down:false},targetY:null,target:null,pauseUntil:0,flash:null,now:performance.now()};
-  sizeCanvas(); def.init(g); setControls(def); hud();
+  setControls(def); sizeCanvas(); def.init(g); hud();
   overlay(`<div class="card"><h2>${def.emoji} ${def.name}</h2><p>${def.how}</p><p style="font-size:14px;color:#6a64a0">👀 Watch out for surprise visitors – tap them for +3!</p><p style="font-size:14px"><b>Joke:</b> ${pick(JOKES)}</p><div class="row"><button class="btn green" id="goBtn">Start ▶</button></div><p class="locked">or press Space</p></div>`);
   $('#goBtn').onclick=startCountdown;
   g.last=performance.now(); cancelAnimationFrame(raf); raf=requestAnimationFrame(loop);
 }
 function sizeCanvas(){
   const W=Math.min(560,$('#canvasBox').getBoundingClientRect().width||340);
-  const H=Math.round(Math.max(320,Math.min(window.innerHeight*0.6,W*1.25)));
+  // leave room for the buttons and hint so nothing is ever off the bottom of the screen
+  const topY=$('#canvasBox').getBoundingClientRect().top+(window.scrollY||0), below=($('#ctrls').offsetHeight||0)+($('#hint').offsetHeight||0)+34;
+  const room=window.innerHeight-topY-below;
+  const H=Math.round(Math.max(240,Math.min(room>0?room:window.innerHeight*0.6,W*1.25)));
   const dpr=window.devicePixelRatio||1;
   g.cv.width=Math.round(W*dpr); g.cv.height=Math.round(H*dpr); g.cv.style.height=H+'px';
   g.ctx.setTransform(dpr,0,0,dpr,0,0); g.W=W; g.H=H;
