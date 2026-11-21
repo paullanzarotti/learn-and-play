@@ -3165,10 +3165,11 @@ function endGame(){
   overlay(`<div class="card"><h2>${top?'🏆 NEW HIGH SCORE!':'Game over!'}</h2><div class="score-big" style="font-size:52px">${g.score}</div><p style="margin:0 0 6px">${pick(GAMEOVER_LINES)}</p>
     <p style="margin:0 0 6px;font-weight:800">${GAMES[id].emoji} ${GAMES[id].name}</p>${hsTable(id,rank<10?rank:-1)}
     <div class="row">${lastQuiz?`<button class="btn green" id="nextChallenge">${lastQuiz.subject==='mtc'?'Try the Times Tables Check again':'Next: '+quizLabel(lastQuiz)} ▶</button>`:''}
-    ${data.tickets>0?`<button class="btn" id="anotherGame">Play another game (🎟️ ${data.tickets})</button>`:''}
+    ${data.tickets>0?`<button class="btn green" id="sameGame">${GAMES[id].emoji} Play ${GAMES[id].name} again (🎟️ ${data.tickets})</button><button class="btn" id="anotherGame">Pick a different game</button>`:`<p style="margin:6px 0;font-weight:700">🎟️ Out of tickets! Score 9 or 10 in a quiz to play again.</p>`}
     <button class="btn alt" id="goHome">Home</button></div></div>`);
   if($('#nextChallenge')) $('#nextChallenge').onclick=()=>{ stopGame(); startTest(lastQuiz.subject,lastQuiz.unit); };
   if($('#anotherGame')) $('#anotherGame').onclick=()=>{ stopGame(); renderPicker(); };
+  if($('#sameGame')) $('#sameGame').onclick=()=>{ stopGame(); openGame(id); };
   $('#goHome').onclick=()=>{ stopGame(); renderHome(); };
 }
 function stopGame(){ cancelAnimationFrame(raf); g=null; overlay(''); }
