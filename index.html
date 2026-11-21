@@ -2311,7 +2311,7 @@ function finishTest(){
   $('#resFact').innerHTML=`<b>🧠 Did you know?</b>${pick(FACTS)}`;
   const btns=$('#resBtns'); btns.innerHTML='';
   if (pass) btns.append(mkBtn('Choose your game 🎮','btn green',()=>renderPicker()));
-  else btns.append(mkBtn('Try again ↻','btn',()=>startTest(cur.subject,cur.unit)));
+  { const sub=cur.subject, un=cur.unit; btns.append(mkBtn(pass?'Do this quiz again ↻':'Try again ↻','btn',()=>startTest(sub,un))); }
   if(cur.marks.some(m=>m===false) && Object.keys(data.review).length) btns.append(mkBtn('🔁 Fix my mistakes','btn',()=>startTest('mistakes')));
   if(hasTopics(cur.subject)){ const sub=cur.subject; btns.append(mkBtn('← '+SUBJECTS[sub].name+' topics','btn alt',()=>renderTopics(sub))); }
   btns.append(mkBtn('🏠 Home','btn alt',renderHome));
