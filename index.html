@@ -126,6 +126,8 @@ canvas{display:block;width:100%;border-radius:20px;background:#1d1747;touch-acti
 .frac sup{border-bottom:3px solid currentColor}
 .passage{font-size:15px;font-weight:500;line-height:1.5;text-align:left;background:#fffbe8;border:2px solid #f3e3a0;border-radius:14px;padding:10px 12px;margin:0 0 10px;max-height:38vh;overflow:auto}
 .passage b{font-size:16px}
+.w{cursor:pointer;border-radius:5px;transition:background .15s}
+.w.talk{background:#fff1a8;box-shadow:0 0 0 2px #fff1a8}
 .pq{font-weight:800}
 .fig{display:block;margin:10px auto 0;max-width:100%}
 .timerbar{height:12px;border-radius:6px;background:#ece9ff;overflow:hidden;margin-bottom:10px}
@@ -227,6 +229,7 @@ canvas{display:block;width:100%;border-radius:20px;background:#1d1747;touch-acti
     <div class="card goldcard" id="goldCard" style="margin:8px 0 12px"></div>
     <button class="subj" id="goMistakes" style="width:100%;margin:0 0 12px;background:#fff0f7;border:3px solid #ff5fa2"><span class="emoji">🔁</span><div><b>Fix my mistakes</b><span id="lvlMistakes"></span></div><span class="go">▶</span></button>
     <div class="subjects">
+      <button class="subj" id="goGeneral"><span class="emoji">🌍</span><div><b>General Knowledge</b><span id="lvlGeneral">Questions from every subject, all mixed up</span></div><span class="go">▶</span></button>
       <button class="subj" id="goMaths"><span class="emoji">🔢</span><div><b>Maths</b><span id="lvlMaths"></span></div><span class="go">▶</span></button>
       <button class="subj" id="goScience"><span class="emoji">🔬</span><div><b>Science</b><span id="lvlScience"></span></div><span class="go">▶</span></button>
       <button class="subj" id="goReading"><span class="emoji">📖</span><div><b>Reading</b><span id="lvlReading"></span></div><span class="go">▶</span></button>
@@ -284,7 +287,7 @@ canvas{display:block;width:100%;border-radius:20px;background:#1d1747;touch-acti
     <div class="prog" id="prog"></div>
     <div class="warm hidden" id="warmup">💪 Warm-up round! A slightly easier quiz to get you back in the groove.</div>
     <div class="card">
-      <div class="qhead"><span id="qnum"></span><button class="say" id="sayBtn">🔊 Read to me</button></div>
+      <div class="qhead"><span id="qnum"></span><button class="say hidden" id="sayBtn" style="display:none"></button></div>
       <div class="timerbar hidden" id="timerBar"><div></div></div>
       <div class="q" id="qtext"></div>
       <div class="opts" id="opts"></div>
@@ -447,6 +450,31 @@ function speak(text){
     speechSynthesis.speak(u);
   }catch(e){}
 }
+/* tap any word in a question to hear just that word */
+function wrapWords(el,q){
+  const fwords=new Set(String(q&&q.flText||'').toLowerCase().split(/[^\p{L}'’-]+/u).filter(Boolean));
+  const walk=n=>{
+    if(n.nodeType===1){ if(/^(SVG|INPUT|BUTTON|SCRIPT|STYLE)$/i.test(n.tagName)||n.classList.contains('revtag')||n.closest('svg')) return; [...n.childNodes].forEach(walk); return; }
+    if(n.nodeType!==3||!n.textContent.trim()) return;
+    const frag=document.createDocumentFragment();
+    n.textContent.split(/(\s+)/).forEach(part=>{
+      const clean=part.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}'’]+$/gu,'');
+      if(!clean||!/\p{L}/u.test(clean)){ frag.append(part); return; }
+      const sp=document.createElement('span'); sp.className='w'; sp.textContent=part; sp.dataset.w=clean;
+      if(q&&q.fl&&fwords.has(clean.toLowerCase())) sp.dataset.fl=q.fl;
+      frag.append(sp);
+    });
+    n.replaceWith(frag);
+  };
+  walk(el);
+}
+document.addEventListener('click',e=>{
+  const sp=e.target.closest&&e.target.closest('#qtext .w'); if(!sp) return;
+  document.querySelectorAll('#qtext .w.talk').forEach(x=>x.classList.remove('talk'));
+  sp.classList.add('talk'); setTimeout(()=>sp.classList.remove('talk'),700);
+  try{ speechSynthesis.cancel(); }catch(_){}
+  if(sp.dataset.fl) speakForeign(sp.dataset.w, sp.dataset.fl); else speak(sp.dataset.w);
+});
 /* say the English, then the foreign word/phrase in a native voice */
 function speakForeign(phrase, lang){
   try{
@@ -2020,7 +2048,8 @@ const SUBJECTS={
   spelling:{name:'Spelling',emoji:'🔤',max:3},
   writing:{name:'Writing',emoji:'✏️',max:3},
   mtc:{name:'Times Tables Check',emoji:'⏱',max:0},
-  mistakes:{name:'Fix my mistakes',emoji:'🔁',max:0}
+  mistakes:{name:'Fix my mistakes',emoji:'🔁',max:0},
+  general:{name:'General Knowledge',emoji:'🌍',max:0}
 };
 const qKey=(subject,unit)=>unit?subject+':'+unit:subject;
 function unitName(subject,unit){ if(!unit) return ''; if(unit==='mixed') return 'Mixed'; const u=((SUBJECTS[subject]||{}).units||{})[unit]||MU4[unit]||MU2[unit]||SCI4[unit]||SCI2[unit]||HIS4[unit]||HIS2[unit]||GEO4[unit]||GEO2[unit]||FR4[unit]||ES[unit]||LIFE4[unit]||LIFE2[unit]; return u?u.name:unit; }
@@ -2043,8 +2072,21 @@ function buildMTC(){
   while(qs.length<MTC.n && t++<3000){ const a=Math.random()<.6?pick(hard):pick(MTC.tables), b=between(YEAR===2?1:2,MTC.maxB), it=factKey(a,b); if(seen.has(it)) continue; if(isMastered(it)&&Math.random()<0.75&&t<2000) continue; seen.add(it); qs.push(mk(a,b)); }
   return shuffle(qs);
 }
+function buildGeneral(){
+  const pool=['maths','maths','science','history','geography','spelling','writing','life','spanish'].concat(YEAR===4?['french']:[]);
+  const qs=[], seen=new Set(); let order=shuffle(pool), i=0, tries=0;
+  while(qs.length<10 && tries++<60){
+    const sub=order[i++%order.length]; if(i%order.length===0) order=shuffle(pool);
+    const S=SUBJECTS[sub], units=S.order||null, unit=units&&units.length?pick(units):undefined;
+    let built=[]; try{ built=buildTest(sub, unit, getLevel(sub,unit), false).filter(q=>!q.isReview && !seen.has(q.item)); }catch(e){ continue; }
+    if(!built.length) continue;
+    const q=built[0]; seen.add(q.item); q.gk=S.emoji+' '+S.name; qs.push(q);
+  }
+  return shuffle(qs);
+}
 function buildTest(subject, unit, level, boost){
   if(subject==='mtc') return buildMTC();
+  if(subject==='general') return buildGeneral();
   if(subject==='mistakes') return shuffle(Object.values(data.review).sort((a,b)=>(b.w||1)-(a.w||1)||a.t-b.t).slice(0,10).map(r=>({...r.q,isReview:true}))).map(q=>{ if(q.options) q.options=shuffle(q.options); return q; });
   const key=qKey(subject,unit), rev=reviewFor(key, boost?1:3);
   let qs;
@@ -2100,7 +2142,7 @@ function record(q,right){
     const old=data.review[q.item];
     data.review[q.item]={q:copy,topic:q.topic,need:2,t:Date.now(),w:(old?old.w:0)+1};
     const ks=Object.keys(data.review); if(ks.length>80) ks.sort((a,b)=>data.review[a].t-data.review[b].t).slice(0,ks.length-80).forEach(k=>delete data.review[k]);
-  } else if(data.review[q.item]){ const r=data.review[q.item]; r.need--; if(r.need<=0) delete data.review[q.item]; }
+  } else if(data.review[q.item]){ const r=data.review[q.item]; r.need--; if(r.need<=0 || (cur&&cur.subject==='mistakes')) delete data.review[q.item]; }
 }
 function reviewFor(key,n){
   const subj=key.split(':')[0], mixed=key.endsWith(':mixed');
@@ -2134,12 +2176,12 @@ const FACTS=[
 let curScreen='welcome';
 function show(id){ curScreen=id; for (const s of ['welcome','players','addPlayer','home','topics','quiz','result','picker','game','parent']) $('#'+s).classList.toggle('hidden', s!==id); window.scrollTo(0,0); }
 function levelLabel(l,max){ max=max||3; return l>max ? `Level ${l} · Champion` : `Level ${l}`; }
-function quizLabel(q){ if(!q) return ''; const S=SUBJECTS[q.subject]; if(q.subject==='mtc'||q.subject==='mistakes') return S.name; return `${S.name}${q.unit?' · '+unitName(q.subject,q.unit):''} ${levelLabel(getLevel(q.subject,q.unit),S.max)}`; }
+function quizLabel(q){ if(!q) return ''; const S=SUBJECTS[q.subject]; if(q.subject==='mtc'||q.subject==='mistakes'||q.subject==='general') return S.name; return `${S.name}${q.unit?' · '+unitName(q.subject,q.unit):''} ${levelLabel(getLevel(q.subject,q.unit),S.max)}`; }
 
 let hsSel=null;
 function renderHome(){
   $('#starsHome').textContent='⭐ '+data.stars;
-  const nMis=Object.keys(data.review||{}).length; $('#goMistakes').style.display=nMis?'':'none'; $('#lvlMistakes').textContent=`${nMis} question${nMis===1?'':'s'} to try again – get each one right twice to clear it`;
+  const nMis=Object.keys(data.review||{}).length; $('#goMistakes').style.display=nMis?'':'none'; $('#lvlMistakes').textContent=`${nMis} question${nMis===1?'':'s'} to try again – get one right and it disappears`;
   const gn=data.golden||0, gp=data.perfects||0;
   $('#goldCard').innerHTML=`<div class="game-card"><span class="emoji">🎫</span><div style="flex:1"><b style="font-size:18px">Golden Tickets: ${gn}</b><div class="mbar"><div style="width:${gp/3*100}%;background:#f0b400"></div></div><div class="locked">${gp} of 3 perfect 10/10 quizzes in a row · any other score starts the count again</div></div>${gn>0?'<button class="btn green small" id="useGold">Swap for a treat 🎁</button>':''}</div>`;
   if($('#useGold')) $('#useGold').onclick=redeemGolden;
@@ -2191,7 +2233,7 @@ function hsTable(id, highlightIdx){
 let cur=null, qTimer=null;
 function startTest(subject, unit){
   if(subject==='mistakes' && !Object.keys(data.review||{}).length){ renderHome(); return; }
-  const fixed = subject==='mtc'||subject==='mistakes';
+  const fixed = subject==='mtc'||subject==='mistakes'||subject==='general';
   const stored = fixed ? 0 : getLevel(subject,unit);
   const boost = !fixed && needsBoost(qKey(subject,unit));
   const level = boost ? Math.max(1,stored-1) : stored;
@@ -2199,7 +2241,7 @@ function startTest(subject, unit){
   const S=SUBJECTS[subject];
   $('#quizTitle').textContent = fixed ? `${S.emoji} ${S.name}` : `${boost?'💪 Warm-up · ':S.emoji+' '}${unit?unitName(subject,unit):S.name} · ${levelLabel(level,S.max)}`;
   $('#warmup').classList.toggle('hidden',!boost);
-  $('#sayBtn').classList.toggle('hidden', subject==='mtc');
+  /* "Read to me" button removed */
   show('quiz'); renderQ();
 }
 function renderProg(){
@@ -2210,7 +2252,8 @@ function renderQ(){
   const q=cur.qs[cur.i];
   renderProg();
   $('#qnum').textContent=`Question ${cur.i+1} of ${cur.qs.length}`;
-  $('#qtext').innerHTML=(q.isReview?'<span class="revtag">🔁 Practice again</span>':'')+q.q+(q.extra||'');
+  $('#qtext').innerHTML=(q.isReview?'<span class="revtag">🔁 Practice again</span>':'')+(q.gk?`<span class="revtag" style="background:#e6f4ff;color:#2a7ab8">${q.gk}</span>`:'')+q.q+(q.extra||'');
+  wrapWords($('#qtext'),q);
   $('#feedback').innerHTML=''; $('#nextRow').classList.add('hidden');
   const box=$('#opts'); box.innerHTML='';
   const isIn=q.type==='input';
@@ -2289,7 +2332,7 @@ function finishTest(){
   const key=qKey(cur.subject,cur.unit), T=data.topics[key]||(data.topics[key]={s:[]}); T.s.push(cur.score/n); if(T.s.length>6) T.s.shift();
   if (pass){
     cur.qs.forEach((q,i)=>{ if(cur.marks[i] && data.items[q.item]) data.items[q.item].m=true; });
-    if(cur.subject!=='mtc' && cur.subject!=='mistakes' && !cur.boost) data.levels[key]=cur.level+1;
+    if(cur.subject!=='mtc' && cur.subject!=='mistakes' && cur.subject!=='general' && !cur.boost) data.levels[key]=cur.level+1;
     data.tickets++; data.stars+=5;
   }
   let coinMsg='', goldenWin=false;
@@ -3237,6 +3280,7 @@ $('#goFrench').onclick=()=>renderTopics('french');
 $('#goSpanish').onclick=()=>renderTopics('spanish');
 $('#goLife').onclick=()=>renderTopics('life');
 $('#goReading').onclick=()=>startTest('reading');
+$('#goGeneral').onclick=()=>startTest('general');
 $('#goHistory').onclick=()=>renderTopics('history');
 $('#goGeography').onclick=()=>renderTopics('geography');
 $('#goMtc').onclick=()=>startTest('mtc');
