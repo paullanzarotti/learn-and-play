@@ -98,6 +98,9 @@ canvas{display:block;width:100%;border-radius:20px;background:#1d1747;touch-acti
 .frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.05;margin:0 3px}
 .frac sup,.frac sub{font-size:1em;vertical-align:baseline;padding:0 4px}
 .frac sup{border-bottom:3px solid currentColor}
+.passage{font-size:15px;font-weight:500;line-height:1.5;text-align:left;background:#fffbe8;border:2px solid #f3e3a0;border-radius:14px;padding:10px 12px;margin:0 0 10px;max-height:38vh;overflow:auto}
+.passage b{font-size:16px}
+.pq{font-weight:800}
 .fig{display:block;margin:10px auto 0;max-width:100%}
 .timerbar{height:12px;border-radius:6px;background:#ece9ff;overflow:hidden;margin-bottom:10px}
 .timerbar div{height:100%;width:100%;background:linear-gradient(90deg,#ff5fa2,#ffd23f,#7cf2b0)}
@@ -198,6 +201,9 @@ canvas{display:block;width:100%;border-radius:20px;background:#1d1747;touch-acti
     <div class="subjects">
       <button class="subj" id="goMaths"><span class="emoji">🔢</span><div><b>Maths</b><span id="lvlMaths"></span></div><span class="go">▶</span></button>
       <button class="subj" id="goScience"><span class="emoji">🔬</span><div><b>Science</b><span id="lvlScience"></span></div><span class="go">▶</span></button>
+      <button class="subj" id="goReading"><span class="emoji">📖</span><div><b>Reading</b><span id="lvlReading"></span></div><span class="go">▶</span></button>
+      <button class="subj" id="goHistory"><span class="emoji">🏰</span><div><b>History</b><span id="lvlHistory"></span></div><span class="go">▶</span></button>
+      <button class="subj" id="goGeography"><span class="emoji">🗺️</span><div><b>Geography</b><span id="lvlGeography"></span></div><span class="go">▶</span></button>
       <button class="subj" id="goSpelling"><span class="emoji">🔤</span><div><b>Spelling</b><span id="lvlSpelling"></span></div><span class="go">▶</span></button>
       <button class="subj" id="goWriting"><span class="emoji">✏️</span><div><b>Writing</b><span id="lvlWriting"></span></div><span class="go">▶</span></button>
       <button class="subj" id="goMtc"><span class="emoji">⏱</span><div><b id="mtcName">Times Tables Check</b><span id="lvlMtc"></span></div><span class="go">▶</span></button>
@@ -1159,7 +1165,431 @@ const WRITE_PLAN2 = {
   3:[fixed(LISTC),fixed(TENSE2),fixed(TENSE2),fixed(APOS2),fixed(APOS2),fixed(EREST),fixed(EREST),fixed(SUFFIX2),fixed(SUFFIX2),fixed(CONJ2),fixed(STYPE),fixed(NOUNPH2),fixed(WCLASS2)]
 };
 
+/* =========================================================
+   HISTORY, GEOGRAPHY, READING  (Year 2 and Year 4)
+   Question rows: [level, question, answer, wrong1, wrong2, wrong3]
+   ========================================================= */
+const HIS4={
+ victorians:{name:'Victorians',emoji:'🎩',q:[
+  [1,'Who was queen for most of the Victorian era?','Queen Victoria','Queen Elizabeth I','Queen Anne','Queen Mary'],
+  [1,'Roughly when did Queen Victoria reign?','1837 to 1901','1066 to 1100','1914 to 1918','1500 to 1550'],
+  [1,'What powered most Victorian trains?','steam','electricity','petrol','wind'],
+  [1,'Where did many poor Victorian children work?','in factories and mines','in offices with computers','as airline pilots','in supermarkets'],
+  [1,'What did Victorian children often write on at school?','a slate','an iPad','a whiteboard','a laptop'],
+  [2,'Who was Queen Victoria’s husband?','Prince Albert','Prince Charles','King Henry','Prince George'],
+  [2,'Where were poor people sent if they had no money or home?','the workhouse','the palace','a hotel','the seaside'],
+  [2,'Which job made children climb up inside chimneys?','chimney sweep','mudlark','page boy','postman'],
+  [2,'Which engineer built bridges, ships and the Great Western Railway?','Isambard Kingdom Brunel','Isaac Newton','Thomas Edison','Henry VIII'],
+  [2,'What punishment might a strict Victorian teacher use?','the cane','a sticker','extra playtime','a gold star'],
+  [3,'A law in 1870 meant that…','schools were set up for all children aged 5 to 12','children had to work in factories','everyone had to own a train','schools were closed'],
+  [3,'What were “mudlarks”?','children who searched river mud for things to sell','a type of bird','Victorian sailors','strict teachers'],
+  [3,'Which writer showed the hard lives of poor children in “Oliver Twist”?','Charles Dickens','Roald Dahl','William Shakespeare','J.K. Rowling'],
+  [3,'The Great Exhibition of 1851 was held in a huge glass building called…','the Crystal Palace','the Tower of London','Buckingham Palace','the Shard'],
+  [3,'Why did Victorian towns and cities grow so fast?','people moved there for factory jobs','there were no more farms','the sea dried up','the Romans built them']]},
+ anglosaxons:{name:'Anglo-Saxons',emoji:'🛡️',q:[
+  [1,'Where did the Anglo-Saxons come from?','northern Germany, Denmark and the Netherlands','Italy','Egypt','America'],
+  [1,'What were most Anglo-Saxon homes made of?','wood, with thatched roofs','glass','concrete','steel'],
+  [1,'Who left Britain around AD 410, before the Anglo-Saxons settled?','the Romans','the Vikings','the Normans','the Victorians'],
+  [1,'What did most Anglo-Saxons do for a living?','farming','factory work','driving trains','flying planes'],
+  [1,'Where did an Anglo-Saxon chief and his warriors feast?','in the great hall','in a stone castle','in a café','at the railway station'],
+  [2,'Sutton Hoo is famous for…','a buried ship full of treasure','a Roman road','a Victorian factory','a stone castle'],
+  [2,'Which Anglo-Saxon king fought the Vikings and is called “the Great”?','Alfred','Arthur','Harold','Henry'],
+  [2,'Anglo-Saxon England was split into several…','kingdoms','counties','states','planets'],
+  [2,'Which of these was an Anglo-Saxon kingdom?','Wessex','Scotland','Normandy','Jorvik'],
+  [2,'Lots of English place names ending in “-ham” or “-ton” come from…','the Anglo-Saxons','the Romans','the Victorians','the French'],
+  [3,'The famous helmet from Sutton Hoo probably belonged to…','King Raedwald','Julius Caesar','Queen Victoria','Alfred the Great'],
+  [3,'Who sent St Augustine to bring Christianity to the Anglo-Saxons in AD 597?','Pope Gregory','King Arthur','a Viking chief','Queen Boudicca'],
+  [3,'What was “Danegeld”?','money paid to the Vikings to go away','a Saxon sword','a type of house','a harvest festival'],
+  [3,'Wednesday and Thursday are named after which Anglo-Saxon gods?','Woden and Thor','Mars and Jupiter','Ra and Isis','Zeus and Hera'],
+  [3,'The monk Bede is famous for writing…','a history of the English people','the Domesday Book','Harry Potter','Beowulf’s songs for TV']]},
+ vikings:{name:'Vikings',emoji:'⛵',q:[
+  [1,'Where did the Vikings come from?','Scandinavia (Norway, Sweden and Denmark)','Italy','Egypt','Spain'],
+  [1,'How did the Vikings travel to Britain?','in longships','by plane','by train','on horses across the sea'],
+  [1,'In which year did the Vikings raid Lindisfarne?','AD 793','AD 1066','1837','55 BC'],
+  [1,'What kind of place was Lindisfarne?','a monastery','a factory','a shopping centre','a castle'],
+  [1,'Which of these did real Vikings NOT have?','horned helmets','swords','shields','longships'],
+  [2,'What was the Viking-ruled part of England called?','the Danelaw','Wessex','Hadrian’s Wall','Normandy'],
+  [2,'Which modern city was the Viking town of Jorvik?','York','London','Manchester','Bath'],
+  [2,'What letters did the Vikings carve?','runes','hieroglyphs','emojis','Chinese characters'],
+  [2,'Who was the chief Viking god?','Odin','Zeus','Ra','Jupiter'],
+  [2,'As well as raiders, many Vikings were…','farmers and traders','astronauts','factory workers','Roman soldiers'],
+  [3,'Why did the Vikings raid monasteries?','they had treasure and few guards','they wanted to learn to read','they were lost','they were invited'],
+  [3,'Which Viking god had a hammer called Mjölnir?','Thor','Loki','Odin','Freya'],
+  [3,'How were some important Vikings buried?','in a ship, sometimes burned','in a pyramid','under a church tower','in Rome'],
+  [3,'The Viking age in England is said to end in 1066 at the Battle of…','Stamford Bridge','Waterloo','Trafalgar','Bosworth'],
+  [3,'What was a Viking “thing”?','a meeting where free men made laws','a type of boat','a sword','a festival food']]},
+ romans:{name:'Romans in Britain',emoji:'🏛️',q:[
+  [1,'Which city did the Romans come from?','Rome','Paris','London','Athens'],
+  [1,'What did the Romans build that were very straight?','roads','rivers','mountains','forests'],
+  [1,'What were Roman soldiers called?','legionaries','knights','Vikings','pirates'],
+  [1,'What language did the Romans speak?','Latin','English','French','Norse'],
+  [1,'Which wall did the Romans build across northern England?','Hadrian’s Wall','the Great Wall','the Berlin Wall','the Wall of Troy'],
+  [2,'Which emperor’s army invaded Britain in AD 43?','Claudius','Nero','Hadrian','Augustus'],
+  [2,'Which queen of the Iceni tribe fought the Romans?','Boudicca','Victoria','Cleopatra','Elizabeth'],
+  [2,'What did the Romans call London?','Londinium','Jorvik','Camelot','Wessex'],
+  [2,'Where did Romans go to wash, chat and relax?','the public baths','the cinema','the library','the supermarket'],
+  [2,'What does the Roman numeral X mean?','10','5','50','1'],
+  [3,'What is a mosaic?','a picture made of tiny tiles','a type of sword','a Roman house','a chariot race'],
+  [3,'Which English city is famous for its Roman baths?','Bath','Leeds','Liverpool','Norwich'],
+  [3,'Why did the Romans build roads?','to move soldiers and goods quickly','for car racing','to stop rivers','just for decoration'],
+  [3,'When did Julius Caesar first come to Britain?','55 BC','AD 43','AD 410','1066'],
+  [3,'Town names ending in “-chester” or “-caster” often mean the place was once…','a Roman fort or town','a Viking village','a Victorian factory','a Norman castle']]},
+ stoneage:{name:'Stone Age to Iron Age',emoji:'🪨',q:[
+  [1,'What were the very first tools made from?','stone','plastic','steel','gold'],
+  [1,'How did early Stone Age people get their food?','hunting and gathering','going to shops','ordering online','growing it in greenhouses'],
+  [1,'Which famous stone circle is in Wiltshire?','Stonehenge','Big Ben','the Shard','Hadrian’s Wall'],
+  [1,'Which age came straight after the Stone Age?','the Bronze Age','the Iron Age','the Gold Age','the Plastic Age'],
+  [1,'Skara Brae is a Stone Age village in…','Orkney, Scotland','London','Cornwall','Wales'],
+  [2,'Bronze is made by mixing copper and…','tin','iron','gold','silver'],
+  [2,'In the New Stone Age, people began to…','farm and live in one place','build cars','use iron swords','write books'],
+  [2,'What were Iron Age forts on hilltops called?','hillforts','castles','towers','bunkers'],
+  [2,'Which age came last, just before the Romans arrived?','the Iron Age','the Bronze Age','the New Stone Age','the Old Stone Age'],
+  [2,'Why did iron take over from bronze for tools?','it was stronger and easier to find','it was prettier','it was softer','it glowed'],
+  [3,'What did Stone Age cave paintings often show?','animals that people hunted','cars','castles','Roman soldiers'],
+  [3,'What were roundhouse roofs made of?','thatch (straw or reeds)','glass','metal sheets','plastic'],
+  [3,'What is a barrow?','an ancient burial mound','a weapon','a type of food','a boat'],
+  [3,'What did farmers use to grind grain into flour?','a quern stone','an electric mill','a sword','a shield'],
+  [3,'The Iron Age in Britain ended when…','the Romans arrived','the Vikings arrived','the dinosaurs died out','Victoria became queen']]}
+};
+const HIS_ORDER4=['victorians','anglosaxons','vikings','romans','stoneage'];
+
+const GEO4={
+ rivers:{name:'Rivers & the water cycle',emoji:'🌊',q:[
+  [1,'Where does a river start?','the source','the mouth','the delta','the estuary'],
+  [1,'Where does a river meet the sea?','the mouth','the source','the bank','the bed'],
+  [1,'What is the longest river in the UK?','the River Severn','the River Thames','the River Tyne','the River Avon'],
+  [1,'Which river flows through London?','the Thames','the Severn','the Nile','the Mersey'],
+  [1,'What is a small river that joins a bigger one called?','a tributary','a meander','an estuary','a delta'],
+  [2,'What is a meander?','a big bend in a river','a waterfall','a lake','the start of a river'],
+  [2,'When water vapour cools and forms clouds, it is called…','condensation','evaporation','precipitation','collection'],
+  [2,'When the Sun heats water and turns it into vapour, it is called…','evaporation','condensation','freezing','melting'],
+  [2,'Rain, snow and hail are all types of…','precipitation','evaporation','condensation','erosion'],
+  [2,'Which river flows through Egypt?','the Nile','the Thames','the Amazon','the Danube'],
+  [3,'What is erosion?','rock and soil being worn away by water or wind','mountains growing','water freezing','plants growing'],
+  [3,'The flat land beside a river that can flood is called the…','floodplain','source','summit','tributary'],
+  [3,'Where a river widens and fresh water mixes with sea water is an…','estuary','ox-bow lake','waterfall','source'],
+  [3,'What is an ox-bow lake?','a meander cut off from the river','a lake shaped like a cow','a reservoir','a waterfall pool'],
+  [3,'Which is the biggest river in South America?','the Amazon','the Nile','the Thames','the Mississippi']]},
+ mountains:{name:'Mountains & volcanoes',emoji:'🌋',q:[
+  [1,'What is the highest mountain in the world?','Mount Everest','Ben Nevis','Snowdon','Kilimanjaro'],
+  [1,'What is the highest mountain in the UK?','Ben Nevis','Snowdon','Scafell Pike','Everest'],
+  [1,'What can come out of an erupting volcano?','lava, ash and gas','water and fish','snow','sweets'],
+  [1,'What is hot melted rock underground called?','magma','lava','ice','sand'],
+  [1,'What is the top of a mountain called?','the summit','the base','the valley','the river'],
+  [2,'What is magma called once it comes out of a volcano?','lava','snow','smoke','marble'],
+  [2,'Which mountain range is Mount Everest in?','the Himalayas','the Alps','the Andes','the Rockies'],
+  [2,'The Earth’s crust is broken into giant pieces called…','tectonic plates','volcanoes','magnets','glaciers'],
+  [2,'What is the highest mountain in Wales?','Yr Wyddfa (Snowdon)','Ben Nevis','Scafell Pike','Everest'],
+  [2,'Mount Etna is an active volcano in…','Italy','Spain','Wales','Norway'],
+  [3,'A volcano that could erupt again but has not for a long time is…','dormant','extinct','active','frozen'],
+  [3,'What can a big earthquake under the sea cause?','a tsunami','a rainbow','a drought','a heatwave'],
+  [3,'Edinburgh Castle stands on top of an old…','extinct volcano','glacier','river','sand dune'],
+  [3,'What is the highest mountain in England?','Scafell Pike','Ben Nevis','Snowdon','Everest'],
+  [3,'What do we call the place where two tectonic plates meet?','a plate boundary','a summit','a meander','a source']]},
+ uk4:{name:'UK countries & cities',emoji:'🇬🇧',q:[
+  [1,'What is the capital of Scotland?','Edinburgh','Glasgow','Cardiff','Belfast'],
+  [1,'What is the capital of Wales?','Cardiff','Swansea','Edinburgh','Dublin'],
+  [1,'What is the capital of Northern Ireland?','Belfast','Dublin','Cardiff','Glasgow'],
+  [1,'Which four countries make up the United Kingdom?','England, Scotland, Wales and Northern Ireland','England, France, Spain and Wales','England, Scotland, Ireland and Iceland','London, Paris, Rome and Berlin'],
+  [1,'Which sea is to the east of England?','the North Sea','the Irish Sea','the Red Sea','the Black Sea'],
+  [2,'Which sea lies between Great Britain and Ireland?','the Irish Sea','the North Sea','the Red Sea','the Black Sea'],
+  [2,'What is a county?','an area of a country with its own council','a city','a mountain','a river'],
+  [2,'Which of these is an English county?','Kent','Glasgow','Paris','Snowdonia'],
+  [2,'Which is the largest city in Scotland?','Glasgow','Edinburgh','Aberdeen','Dundee'],
+  [2,'The stretch of sea between England and France is the…','English Channel','Irish Sea','North Sea','Thames'],
+  [3,'Which hills are called “the backbone of England”?','the Pennines','the Alps','the Grampians','the Chilterns'],
+  [3,'Which English city is on the River Mersey?','Liverpool','Leeds','Bristol','Norwich'],
+  [3,'Which city is on the River Cam and famous for its university?','Cambridge','Bath','York','Plymouth'],
+  [3,'What is the mountainous north of Scotland called?','the Highlands','the Lowlands','the Fens','the Broads'],
+  [3,'Which flat area of eastern England was once marshland?','the Fens','the Lake District','the Pennines','the Peak District']]},
+ europe:{name:'Europe & the world',emoji:'🌍',q:[
+  [1,'How many continents are there?','7','5','10','3'],
+  [1,'Which continent is the UK in?','Europe','Africa','Asia','Oceania'],
+  [1,'What is the capital of France?','Paris','Rome','Madrid','Berlin'],
+  [1,'What is the capital of Italy?','Rome','Paris','Athens','Lisbon'],
+  [1,'What is the capital of Spain?','Madrid','Barcelona','Paris','Lisbon'],
+  [2,'What is the capital of Germany?','Berlin','Munich','Vienna','Paris'],
+  [2,'Which is the largest ocean?','the Pacific','the Atlantic','the Indian','the Arctic'],
+  [2,'Which ocean lies between the UK and America?','the Atlantic','the Pacific','the Indian','the Southern'],
+  [2,'Which European country is shaped like a boot?','Italy','Spain','Norway','Greece'],
+  [2,'What is the capital of Greece?','Athens','Rome','Oslo','Madrid'],
+  [3,'Which imaginary line goes around the middle of the Earth?','the Equator','the Prime Meridian','the Arctic Circle','the Tropic of Cancer'],
+  [3,'Which line of longitude passes through Greenwich in London?','the Prime Meridian','the Equator','the Tropic of Capricorn','the Arctic Circle'],
+  [3,'The Northern and Southern Hemispheres are split by…','the Equator','the Prime Meridian','the River Thames','the Alps'],
+  [3,'When it is summer in the UK, what season is it in Australia?','winter','summer','spring','autumn'],
+  [3,'Lines of latitude run…','east to west, around the Earth','from the North Pole to the South Pole','only through London','under the sea']]},
+ maps4:{name:'Maps & compass',emoji:'🧭',q:[
+  [1,'Which direction is opposite North?','South','East','West','Up'],
+  [1,'On most maps, which way is North?','up (the top)','down','left','right'],
+  [1,'What does a map key tell you?','what the symbols mean','the time','the weather','who drew it'],
+  [1,'Which direction is halfway between North and East?','North-East','South-West','North-West','South-East'],
+  [1,'Which direction is opposite East?','West','North','South','North-East'],
+  [2,'How many points does an 8-point compass have?','8','4','16','2'],
+  [2,'Which direction is opposite South-West?','North-East','South-East','North-West','East'],
+  [2,'What does a map scale help you work out?','real distances','the temperature','the time','colours'],
+  [2,'In which direction does the Sun rise?','East','West','North','South'],
+  [2,'In which direction does the Sun set?','West','East','North','South'],
+  [3,'In a grid reference, which number do you read first?','along the bottom (across)','up the side','the key','the title'],
+  [3,'What do contour lines on a map show?','the height of the land','roads','rivers','rain'],
+  [3,'You face North and turn a quarter turn clockwise. Which way do you face?','East','West','South','North-West'],
+  [3,'You face West and make a half turn. Which way do you face?','East','North','South','West'],
+  [3,'A thin blue line on a map usually shows…','a river or stream','a road','a railway','a footpath']]}
+};
+const GEO_ORDER4=['rivers','mountains','uk4','europe','maps4'];
+
+const HIS2={
+ fire2:{name:'Great Fire of London',emoji:'🔥',q:[
+  [1,'In which year was the Great Fire of London?','1666','1066','1966','2000'],
+  [1,'Where did the fire start?','in a bakery on Pudding Lane','in a castle','in a school','at a football ground'],
+  [1,'Whose bakery did the fire start in?','Thomas Farriner’s','Samuel Pepys’s','the King’s','Florence Nightingale’s'],
+  [1,'Which river runs through London?','the River Thames','the River Nile','the River Severn','the River Amazon'],
+  [1,'What were most London houses made of then?','wood','brick','glass','metal'],
+  [2,'Who wrote a famous diary about the fire?','Samuel Pepys','Charles Dickens','Florence Nightingale','Neil Armstrong'],
+  [2,'What did Samuel Pepys bury in his garden to keep it safe?','his cheese','his bicycle','his crown','his computer'],
+  [2,'Who was king at the time of the Great Fire?','Charles II','Henry VIII','George III','William I'],
+  [2,'About how long did the fire burn?','4 days','1 hour','2 years','1 month'],
+  [2,'Why did the fire spread so fast?','houses were wooden and close together, and it was windy','it was snowing','it was night','people helped it'],
+  [3,'How did people stop the fire from spreading?','they pulled down houses to make gaps','they used fire engines with hoses','they waited for snow','they used helicopters'],
+  [3,'Which famous cathedral burned down in the fire?','St Paul’s Cathedral','Westminster Abbey','Canterbury Cathedral','York Minster'],
+  [3,'Who designed the new St Paul’s Cathedral?','Christopher Wren','Samuel Pepys','King Charles II','Thomas Farriner'],
+  [3,'What tall column was built to remember the fire?','the Monument','the London Eye','Big Ben','the Shard'],
+  [3,'How was London made safer after the fire?','new houses were built of brick and stone','more wooden houses were built','everyone moved away','bread was banned']]},
+ people2:{name:'Famous people',emoji:'⭐',q:[
+  [1,'Who was the first person to walk on the Moon?','Neil Armstrong','Christopher Columbus','Florence Nightingale','Isaac Newton'],
+  [1,'Florence Nightingale was a famous…','nurse','astronaut','king','builder'],
+  [1,'In which year did people first land on the Moon?','1969','1666','2020','1901'],
+  [1,'What did soldiers call Florence Nightingale?','the Lady with the Lamp','the Iron Lady','the Moon Lady','the Queen of Hearts'],
+  [1,'Who flew the first powered aeroplane?','the Wright brothers','the Grimm brothers','Neil Armstrong','Samuel Pepys'],
+  [2,'Which country was Mary Seacole from?','Jamaica','Scotland','France','Australia'],
+  [2,'In which war did Florence Nightingale and Mary Seacole help soldiers?','the Crimean War','the Battle of Hastings','the Gunpowder Plot','the Great Fire'],
+  [2,'What did Mary Seacole open to look after soldiers?','the British Hotel','a school','a bakery','a zoo'],
+  [2,'Who was the second person to walk on the Moon?','Buzz Aldrin','Neil Armstrong','Tim Peake','Yuri Gagarin'],
+  [2,'Rosa Parks refused to give up her seat on a…','bus','train','plane','boat'],
+  [3,'Why is Rosa Parks remembered?','she stood up for fair treatment of Black people','she flew to the Moon','she was a nurse','she built aeroplanes'],
+  [3,'What did Florence Nightingale make much better in hospitals?','cleanliness','food deliveries','television','car parks'],
+  [3,'Who was the first person to travel into space?','Yuri Gagarin','Neil Armstrong','Buzz Aldrin','Tim Peake'],
+  [3,'Tim Peake was a British astronaut who lived on the…','International Space Station','Moon','planet Mars','Sun'],
+  [3,'What was the name of the spacecraft that landed on the Moon in 1969?','Apollo 11','Titanic','Mayflower','Rocket 1']]},
+ changes2:{name:'Then and now',emoji:'🧸',q:[
+  [1,'Before electricity, how did people light their homes?','with candles and oil lamps','with light bulbs','with phones','with televisions'],
+  [1,'Which toy is the oldest kind?','a wooden spinning top','a games console','a tablet','a drone'],
+  [1,'How did people wash clothes long ago?','by hand with a washboard','in a washing machine','with a robot','in a dishwasher'],
+  [1,'Before cars, people often travelled by…','horse and cart','aeroplane','electric scooter','spaceship'],
+  [1,'What did people cook on long ago?','a fire or iron range','a microwave','an air fryer','a toaster'],
+  [2,'Your grandparents might have played music on a…','record player','smart speaker','tablet','phone app'],
+  [2,'What does “within living memory” mean?','things that people alive today remember','dinosaur times','the future','dreams'],
+  [2,'Which is a modern way to talk to someone far away?','a video call','a horse rider with a letter','a carrier pigeon','shouting'],
+  [2,'Very old photographs are usually…','black and white','3D','moving','neon coloured'],
+  [2,'Victorian children played with…','hoops, marbles and wooden dolls','video games','fidget spinners','drones'],
+  [3,'Why do many toys today need batteries?','they have lights, sounds or motors','they are made of wood','they are very old','they are heavy'],
+  [3,'How can we find out about the past?','photos, old objects, books and asking older people','only by guessing','watching cartoons','looking at the weather'],
+  [3,'An old object from the past is called an…','artefact','invention','alien','app'],
+  [3,'Which of these came first?','the steam train','the car','the aeroplane','the rocket'],
+  [3,'Seaside holidays became popular when…','trains made travel cheaper','planes were invented','phones were invented','castles were built']]},
+ events2:{name:'Bonfire Night & big days',emoji:'🎆',q:[
+  [1,'What do we remember on 5th November?','Bonfire Night and the Gunpowder Plot','Christmas','Pancake Day','Easter'],
+  [1,'Who is the most famous member of the Gunpowder Plot?','Guy Fawkes','Samuel Pepys','Neil Armstrong','King Charles'],
+  [1,'In which year was the Gunpowder Plot?','1605','1666','1969','2005'],
+  [1,'What did the plotters want to blow up?','the Houses of Parliament','a bakery','a castle in Scotland','the Moon'],
+  [1,'What do people enjoy on Bonfire Night?','bonfires and fireworks','Easter eggs','a Christmas tree','pancakes'],
+  [2,'Who was king at the time of the Gunpowder Plot?','James I','Charles II','Henry VIII','George V'],
+  [2,'Where was the gunpowder hidden?','in a cellar under Parliament','in a tree','in a boat','in a bakery'],
+  [2,'What happened to Guy Fawkes?','he was caught','he became king','he escaped to France','he won a prize'],
+  [2,'Remembrance Day on 11th November remembers people who…','died in wars','went to the Moon','started fires','won races'],
+  [2,'Which flower do people wear for Remembrance Day?','a poppy','a rose','a daisy','a tulip'],
+  [3,'Why did the plotters want to blow up Parliament?','they were unhappy with how Catholics were treated','they wanted fireworks','they were bored','for a party'],
+  [3,'Why is the poppy used for Remembrance?','poppies grew on the battlefields of the First World War','it is the King’s favourite','it grows in winter','it smells nice'],
+  [3,'In which year did the First World War end?','1918','1666','1969','1605'],
+  [3,'The rhyme “Remember, remember the 5th of November” helps us remember…','the Gunpowder Plot','birthdays','times tables','the Moon landing'],
+  [3,'A “guy” burned on a bonfire is a model of…','Guy Fawkes','the King','Father Christmas','a dragon']]}
+};
+const HIS_ORDER2=['fire2','people2','changes2','events2'];
+
+const GEO2={
+ world2:{name:'Continents & oceans',emoji:'🌍',q:[
+  [1,'How many continents are there?','7','4','10','2'],
+  [1,'Which continent do we live in?','Europe','Africa','Asia','Antarctica'],
+  [1,'Which is the biggest ocean?','the Pacific','the Atlantic','the Arctic','the Indian'],
+  [1,'Which is the coldest continent?','Antarctica','Africa','Europe','Oceania'],
+  [1,'How many oceans are there?','5','7','2','10'],
+  [2,'Which continent is Egypt in?','Africa','Asia','Europe','South America'],
+  [2,'Which continent is China in?','Asia','Africa','Europe','North America'],
+  [2,'Which ocean is to the west of the UK?','the Atlantic','the Pacific','the Indian','the Arctic'],
+  [2,'On which continent would you find wild kangaroos?','Oceania (Australia)','Africa','Europe','Antarctica'],
+  [2,'Which continent is the USA in?','North America','South America','Europe','Asia'],
+  [3,'Which is the biggest continent?','Asia','Europe','Africa','Antarctica'],
+  [3,'Which ocean is around the North Pole?','the Arctic Ocean','the Southern Ocean','the Indian Ocean','the Atlantic Ocean'],
+  [3,'Which ocean surrounds Antarctica?','the Southern Ocean','the Arctic Ocean','the Indian Ocean','the North Sea'],
+  [3,'Brazil and Peru are in…','South America','North America','Africa','Europe'],
+  [3,'Which continent is India in?','Asia','Africa','Europe','Oceania']]},
+ uk2:{name:'The United Kingdom',emoji:'🇬🇧',q:[
+  [1,'What is the capital of England?','London','Cardiff','Edinburgh','Belfast'],
+  [1,'How many countries are in the UK?','4','2','7','10'],
+  [1,'What is the capital of Scotland?','Edinburgh','London','Cardiff','Belfast'],
+  [1,'What is the capital of Wales?','Cardiff','London','Edinburgh','Belfast'],
+  [1,'What is the capital of Northern Ireland?','Belfast','Cardiff','Edinburgh','London'],
+  [2,'Which sea is to the east of England?','the North Sea','the Irish Sea','the Red Sea','the Dead Sea'],
+  [2,'Which sea is between Wales and Ireland?','the Irish Sea','the North Sea','the Black Sea','the Red Sea'],
+  [2,'What water separates England and France?','the English Channel','the Irish Sea','the River Thames','the Pacific Ocean'],
+  [2,'Which is the biggest country in the UK by number of people?','England','Wales','Scotland','Northern Ireland'],
+  [2,'What is the UK flag called?','the Union Flag (Union Jack)','the Stars and Stripes','the Maple Leaf','the Tricolour'],
+  [3,'Which country’s flag has a red dragon?','Wales','Scotland','England','Northern Ireland'],
+  [3,'A red cross on a white flag is the flag of…','England','Scotland','Wales','France'],
+  [3,'A white diagonal cross on a blue flag is the flag of…','Scotland','England','Wales','Greece'],
+  [3,'Why is Great Britain called an island?','it has sea all around it','it is very small','it has no mountains','it is in the desert'],
+  [3,'Which ocean is to the west of the UK?','the Atlantic','the Pacific','the Indian','the Arctic']]},
+ hotcold2:{name:'Hot and cold places',emoji:'☀️',q:[
+  [1,'Where is it hottest on Earth?','near the Equator','at the North Pole','at the South Pole','on top of mountains'],
+  [1,'Where is it coldest on Earth?','at the North and South Poles','near the Equator','in the desert','in a rainforest'],
+  [1,'Which animal lives in the Arctic?','polar bear','camel','lion','monkey'],
+  [1,'Which animal lives in Antarctica?','penguin','polar bear','tiger','giraffe'],
+  [1,'A very dry place with hardly any rain is a…','desert','rainforest','ocean','swamp'],
+  [2,'What is the imaginary line around the middle of the Earth?','the Equator','the Pole','the Channel','the Orbit'],
+  [2,'A hot, wet place full of tall trees is a…','rainforest','desert','glacier','beach'],
+  [2,'What is the biggest hot desert in the world?','the Sahara','the Arctic','the Thames','the Alps'],
+  [2,'What is a glacier?','a slow-moving river of ice','a hot sandy hill','a type of tree','a volcano'],
+  [2,'Why is a camel good at living in the desert?','it can go a long time without drinking','it can swim fast','it has thick fur for snow','it lives in trees'],
+  [3,'Penguins live near the…','South Pole','North Pole','Equator','Sahara'],
+  [3,'Polar bears live near the…','North Pole','South Pole','Equator','rainforest'],
+  [3,'Which country has lots of hot desert?','Egypt','Iceland','Norway','Scotland'],
+  [3,'Why are the Poles so cold?','the Sun’s light is weaker there','they are near the Equator','they have lots of volcanoes','they are underground'],
+  [3,'Which of these is a cold country?','Iceland','Kenya','Brazil','Egypt']]},
+ maps2:{name:'Maps & features',emoji:'🧭',q:[
+  [1,'How many main compass directions are there?','4','2','8','10'],
+  [1,'What are the four compass directions?','North, South, East and West','Up, Down, Left and Right','Front, Back, Side and Top','Red, Blue, Green and Yellow'],
+  [1,'A map shows a place from…','above','underground','inside a box','the side'],
+  [1,'What is the opposite of North?','South','East','West','Up'],
+  [1,'What is the opposite of East?','West','North','South','Down'],
+  [2,'What does a map key tell you?','what the symbols mean','how to open a door','the time','the date'],
+  [2,'An aerial photo is taken from…','high above, like a bird','underground','inside a house','underwater'],
+  [2,'On most maps, North is at the…','top','bottom','left','right'],
+  [2,'If you move from the top of a map to the bottom, which way are you going?','South','North','East','West'],
+  [2,'A big “P” on a map often shows a…','car park','pond','post box','playground'],
+  [3,'Which of these is a physical feature (made by nature)?','a river','a road','a shop','a school'],
+  [3,'Which of these is a human feature (made by people)?','a house','a mountain','a beach','the sea'],
+  [3,'Which of these is a physical feature?','a hill','a car park','a factory','a bridge'],
+  [3,'Which of these is a human feature?','a bridge','a cliff','a valley','a forest'],
+  [3,'A port is a place where…','ships load and unload','planes land','only trains stop','farmers grow food']]},
+ weather2:{name:'Weather & seasons',emoji:'🌦️',q:[
+  [1,'How many seasons are there in the UK?','4','2','12','7'],
+  [1,'Which season comes after winter?','spring','summer','autumn','winter again'],
+  [1,'In which season do leaves fall from the trees?','autumn','spring','summer','winter'],
+  [1,'Which season is usually the warmest in the UK?','summer','winter','autumn','spring'],
+  [1,'What do we call frozen water falling from the sky in flakes?','snow','rain','fog','wind'],
+  [2,'Which month is in winter in the UK?','January','July','May','September'],
+  [2,'Which month is in summer in the UK?','July','December','February','October'],
+  [2,'What do we use to measure temperature?','a thermometer','a ruler','a clock','scales'],
+  [2,'What does a weather vane show?','which way the wind is blowing','how hot it is','the time','how much rain fell'],
+  [2,'What do we call little balls of ice falling from the sky?','hail','rain','dew','fog'],
+  [3,'In which season are the days longest in the UK?','summer','winter','autumn','spring'],
+  [3,'What is fog?','a cloud close to the ground','smoke','snow','hail'],
+  [3,'What do you need to see a rainbow?','sunshine and rain','snow and wind','only clouds','night time'],
+  [3,'What does a rain gauge measure?','how much rain falls','wind speed','sunshine','temperature'],
+  [3,'Why do we have seasons?','the Earth is tilted as it travels around the Sun','the Moon gets closer','the Sun switches off','the clouds move']]}
+};
+const GEO_ORDER2=['world2','uk2','hotcold2','maps2','weather2'];
+
+/* ---------- reading comprehension: original passages ---------- */
+const READ2=[
+ {l:1,t:'The Lost Kite',x:'Sam had a red kite. One windy day, he took it to the park with his gran. The kite flew up high, above the trees. Then the string snapped! The kite floated away over the pond. Sam felt sad. But a girl called Maya ran and caught the kite by the gate. Sam said thank you and gave her a turn.',q:[
+  ['What colour was Sam’s kite?','red','blue','green','yellow'],
+  ['Who went to the park with Sam?','his gran','his dad','his teacher','Maya'],
+  ['What happened to the string?','it snapped','it got longer','it turned blue','it got wet'],
+  ['Where did Maya catch the kite?','by the gate','in the pond','up a tree','at school'],
+  ['How did Sam feel when Maya caught his kite?','happy and thankful','angry','scared','bored']]},
+ {l:1,t:'Hedgehogs',x:'Hedgehogs are small animals with spikes on their backs. The spikes are called spines. When a hedgehog is scared, it rolls into a ball. Hedgehogs sleep in the day and look for food at night. They eat beetles, worms and slugs. In winter, they hibernate in a cosy nest of leaves.',q:[
+  ['What are a hedgehog’s spikes called?','spines','feathers','scales','claws'],
+  ['What does a hedgehog do when it is scared?','rolls into a ball','climbs a tree','barks','swims away'],
+  ['When do hedgehogs look for food?','at night','at lunchtime','in the morning','never'],
+  ['Which of these do hedgehogs eat?','slugs','carrots','bread','chocolate'],
+  ['What does “hibernate” mean?','sleep through the winter','fly away','build a house','eat a lot']]},
+ {l:2,t:'Sports Day',x:'It was Sports Day at Oak Tree School. Leo was in the egg-and-spoon race. He held the spoon very still and walked carefully. Ava ran fast, but her egg fell off and she had to go back. Leo did not rush. Step by step, he crossed the finish line first! “Slow and steady wins the race,” smiled Mr Jones.',q:[
+  ['Which race was Leo in?','the egg-and-spoon race','the sack race','the relay race','the swimming race'],
+  ['Why did Ava have to go back?','her egg fell off','she lost her shoe','she was tired','she was late'],
+  ['Which word tells you how Leo walked?','carefully','quickly','noisily','sadly'],
+  ['Who won the race?','Leo','Ava','Mr Jones','nobody'],
+  ['What does “Slow and steady wins the race” mean?','being careful can beat rushing','always run fast','races are boring','never try']]},
+ {l:2,t:'How to Make Pancakes',x:'First, put 100g of flour in a bowl. Next, crack in two eggs and add 300ml of milk. Whisk until smooth. Then ask a grown-up to heat a little oil in a pan. Pour in some batter and cook it until it is golden. Finally, flip the pancake over, cook the other side and add your favourite topping.',q:[
+  ['What do you put in the bowl first?','flour','eggs','milk','oil'],
+  ['How many eggs do you need?','two','one','three','ten'],
+  ['Who should heat the pan?','a grown-up','you on your own','a friend','nobody'],
+  ['What does “whisk” mean?','mix quickly','bake in an oven','cut up','freeze'],
+  ['What is the last step?','add your favourite topping','crack the eggs','heat the oil','put flour in a bowl']]},
+ {l:3,t:'Grandad’s Allotment',x:'Every Saturday, Mia helped Grandad on his allotment. They planted tiny seeds in neat rows and watered them with a green watering can. Weeks passed. Mia was impatient, but Grandad said, “Good things take time.” One sunny morning, Mia spotted little green shoots poking out of the soil. By summer, they were picking juicy strawberries. Mia decided the waiting had been worth it.',q:[
+  ['When did Mia help Grandad?','every Saturday','every day','at Christmas','on Mondays'],
+  ['What does “impatient” mean?','not wanting to wait','very happy','very tired','very kind'],
+  ['What did they grow?','strawberries','carrots','apples','potatoes'],
+  ['What did Grandad mean by “Good things take time”?','some things are worth waiting for','hurry up','the clock is wrong','stop gardening'],
+  ['How did Mia feel at the end?','glad she had waited','angry','bored','sad']]},
+ {l:3,t:'The Moon',x:'The Moon travels around the Earth. It takes about a month to go all the way round. The Moon does not make its own light. It shines because sunlight bounces off it. Its surface is covered in grey dust and big holes called craters. In 1969, astronauts landed there for the first time. There is no air on the Moon, so astronauts must wear space suits.',q:[
+  ['How long does the Moon take to go around the Earth?','about a month','a day','ten years','an hour'],
+  ['Why does the Moon shine?','sunlight bounces off it','it is on fire','it has lights','it is made of glass'],
+  ['What are craters?','big holes on the Moon’s surface','Moon mountains','rockets','stars'],
+  ['Why must astronauts wear space suits on the Moon?','there is no air','it is raining','to look smart','it is too windy'],
+  ['When did astronauts first land on the Moon?','1969','1666','2001','1901']]}
+];
+const READ4=[
+ {l:1,t:'The Secret Door',x:'Priya had walked past the old library a hundred times, but she had never noticed the small wooden door behind the bookshelves. Its brass handle was shaped like a curled-up cat. Curious, she glanced around to check that no one was watching, then turned the handle. The door creaked open, and a warm breeze carried the smell of cinnamon and rain. Beyond it lay a narrow staircase, lit by tiny floating lanterns.',q:[
+  ['Where was the door?','behind the bookshelves in the library','in Priya’s bedroom','at school','in a park'],
+  ['What was the handle shaped like?','a curled-up cat','a dragon','a key','a star'],
+  ['Why did Priya check that no one was watching?','she felt she might not be allowed','she was lost','she wanted help','she was hiding a cat'],
+  ['Which two smells came through the door?','cinnamon and rain','smoke and toast','flowers and grass','soap and salt'],
+  ['Which word best describes Priya?','curious','lazy','frightened','angry']]},
+ {l:1,t:'Honeybees',x:'A honeybee colony can contain up to 50,000 bees, but only one queen. The queen lays the eggs, while worker bees collect nectar and pollen from flowers. Back at the hive, the nectar is turned into honey and stored in wax cells called honeycomb. Bees also help plants. As they move from flower to flower, they carry pollen, which allows plants to make seeds and fruit. This is called pollination.',q:[
+  ['How many queens does a colony have?','one','50,000','ten','none'],
+  ['What do worker bees collect?','nectar and pollen','leaves','water only','wax'],
+  ['What is honeycomb made of?','wax','honey','pollen','wood'],
+  ['What is pollination?','carrying pollen so plants can make seeds and fruit','making honey','building a hive','laying eggs'],
+  ['Why are bees important to farmers?','they help crops make fruit and seeds','they eat pests','they scare birds','they water plants']]},
+ {l:2,t:'The Iron Bridge',x:'In 1779, the world’s first large iron bridge was put up across the River Severn in Shropshire. Before then, bridges were usually made of wood or stone. Iron was strong and could span a wide gap. People travelled from far away to marvel at it, and the village nearby became known as Ironbridge. Today, the area is a World Heritage Site, protected because it helped to start the Industrial Revolution.',q:[
+  ['Which river does the Iron Bridge cross?','the Severn','the Thames','the Mersey','the Trent'],
+  ['What were bridges usually made of before?','wood or stone','plastic','glass','gold'],
+  ['What does “marvel” mean?','look at with amazement','complain','cross quickly','paint'],
+  ['Why did the village become known as Ironbridge?','because of its famous iron bridge','the king ordered it','it flooded','to confuse visitors'],
+  ['Why is the area protected today?','it helped start the Industrial Revolution','it is the longest bridge','it is made of gold','it is in London']]},
+ {l:2,t:'Storm at Sea',x:'The fishing boat rocked violently as grey waves crashed over the deck. Tom gripped the rail with white knuckles while his mother wrestled with the wheel. “Hold on!” she shouted, her voice almost lost in the howling wind. Lightning split the sky. Then, through the rain, Tom spotted a flashing light on the cliffs. “The lighthouse!” he cried. His mother steered towards the safe harbour beside it, and slowly the waves grew calmer.',q:[
+  ['Who was steering the boat?','Tom’s mother','Tom','a fisherman','the lighthouse keeper'],
+  ['“White knuckles” suggests Tom was…','holding on tightly because he was scared','cold','painting','asleep'],
+  ['Which word shows the wind was very loud?','howling','gentle','quiet','soft'],
+  ['How did the lighthouse help them?','it showed them where the safe harbour was','it pulled the boat','it stopped the rain','it phoned for help'],
+  ['How does the mood change at the end?','from frightening to calmer','from calm to scary','from happy to sad','it does not change']]},
+ {l:3,t:'Plastic in the Ocean',x:'Every year, millions of tonnes of plastic end up in the world’s oceans. Some is carried there by rivers; some is dropped on beaches. Plastic can take hundreds of years to break down, and as it does, it crumbles into tiny pieces called microplastics. Sea turtles may mistake floating bags for jellyfish, one of their favourite foods. However, there is hope: many people now use reusable bottles and bags, and volunteers regularly clean beaches.',q:[
+  ['How long can plastic take to break down?','hundreds of years','a week','a day','one year'],
+  ['What are microplastics?','tiny pieces of plastic','small fish','plastic toys','sea plants'],
+  ['Why might a turtle eat a plastic bag?','it looks like a jellyfish','it likes plastic','it tastes nice','it is told to'],
+  ['Which word in the text means you can use something again and again?','reusable','tonnes','crumbles','volunteers'],
+  ['What is the main message of the text?','plastic harms the ocean, but people can help','turtles love plastic','oceans are shrinking','beaches are boring']]},
+ {l:3,t:'The New Girl',x:'When Zara joined Class 4 halfway through the year, she sat silently at the back, staring at her shoes. At lunch she ate alone, pretending to read. On Thursday, Ellie noticed that Zara’s pencil case was covered in drawings of planets. Ellie loved space too. Taking a deep breath, she walked over. “Did you know Saturn would float in a giant bath?” she asked. Zara looked up, and for the first time, she smiled.',q:[
+  ['When did Zara join Class 4?','halfway through the year','at the start of the year','on her birthday','last week'],
+  ['Why did Zara pretend to read at lunch?','she felt lonely and awkward','the book was exciting','she had homework','she was told to'],
+  ['What did Ellie notice about Zara?','her pencil case had drawings of planets','she had a new bag','she was very tall','she had a dog'],
+  ['Why did Ellie take a deep breath?','she felt a little nervous','she was tired','she had been running','she was cold'],
+  ['What does Zara’s smile suggest?','she felt welcomed','she was angry','she wanted to be alone','she was sleepy']]}
+];
+
+/* builders */
+function buildBank(subject, unit, L, boost){
+  const S=SUBJECTS[subject], pre=subject.slice(0,3)+':';
+  const units=unit==='mixed'?S.order:[unit];
+  const pool=units.flatMap(k=>S.units[k].q.map(x=>({x,k})));
+  const pref=list=>{ const lvl=shuffle(list.filter(p=>p.x[0]===L)), lower=shuffle(list.filter(p=>p.x[0]<L)), higher=shuffle(list.filter(p=>p.x[0]>L)); return boost?[...lower,...lvl,...higher]:[...lvl,...lower,...higher]; };
+  const fresh=pool.filter(p=>!isMastered(pre+p.x[1])), old=pool.filter(p=>isMastered(pre+p.x[1]));
+  return [...pref(fresh),...pref(old)].slice(0,10).map(({x:[,q,a,...o],k})=>{ const m=mc(q,a,o,{long:a.length>16||o.some(w=>w.length>16)}); m.item=pre+q; m.skill=pre+k; m.topic=subject+':'+k; return m; });
+}
+function buildReading(L, boost){
+  const done=p=>p.q.every((_,i)=>isMastered('read:'+p.t+':'+i));
+  const score=p=>(done(p)?10:0)+Math.abs(p.l-L)*(boost&&p.l<L?1:2)+(boost&&p.l>L?5:0)+Math.random();
+  const picks=[...READ].sort((a,b)=>score(a)-score(b)).slice(0,2);
+  const out=[];
+  picks.forEach(p=>{
+    const box=`<div class="passage"><b>${p.t}</b><br>${p.x}</div>`;
+    p.q.forEach(([q,a,...o],i)=>{ const m=mc(box+`<div class="pq">${q}</div>`,a,o,{long:a.length>14||o.some(w=>w.length>14),say:(i===0?p.t+'. '+p.x+' ... ':'')+q}); m.item='read:'+p.t+':'+i; m.skill='read:'+(['find','find','word','think','think'][i]||'find'); m.topic='reading'; out.push(m); });
+  });
+  return out;
+}
+
 /* ---------- which year is playing ---------- */
+let HIS=HIS4, HIS_ORDER=HIS_ORDER4, GEO=GEO4, GEO_ORDER=GEO_ORDER4, READ=READ4;
 let YEAR=4, MU=MU4, MATHS_ORDER=MATHS_ORDER4, SCI=SCI4, SCI_ORDER=SCI_ORDER4, NOW_UNITS=NOW_UNITS4, SPELL_PLAN=SPELL_PLAN4, WRITE_PLAN=WRITE_PLAN4;
 const MTC4={name:'Times Tables Check',n:25,t:6,tables:[2,3,4,5,6,7,8,9,10,11,12],hard:[6,7,8,9,12],maxB:12};
 const MTC2={name:'Times Tables Challenge',n:20,t:8,tables:[2,5,10,3],hard:[3,5],maxB:12};
@@ -1169,18 +1599,23 @@ let MTC=MTC4;
 const SUBJECTS={
   maths:{name:'Maths',emoji:'🔢',max:6,units:MU,order:MATHS_ORDER},
   science:{name:'Science',emoji:'🔬',max:3,units:SCI,order:SCI_ORDER},
+  history:{name:'History',emoji:'🏰',max:3,units:HIS,order:HIS_ORDER},
+  geography:{name:'Geography',emoji:'🗺️',max:3,units:GEO,order:GEO_ORDER},
+  reading:{name:'Reading',emoji:'📖',max:3},
   spelling:{name:'Spelling',emoji:'🔤',max:3},
   writing:{name:'Writing',emoji:'✏️',max:3},
   mtc:{name:'Times Tables Check',emoji:'⏱',max:0}
 };
 const qKey=(subject,unit)=>unit?subject+':'+unit:subject;
-function unitName(subject,unit){ if(!unit) return ''; if(unit==='mixed') return 'Mixed'; const u=((SUBJECTS[subject]||{}).units||{})[unit]||MU4[unit]||MU2[unit]||SCI4[unit]||SCI2[unit]; return u?u.name:unit; }
+function unitName(subject,unit){ if(!unit) return ''; if(unit==='mixed') return 'Mixed'; const u=((SUBJECTS[subject]||{}).units||{})[unit]||MU4[unit]||MU2[unit]||SCI4[unit]||SCI2[unit]||HIS4[unit]||HIS2[unit]||GEO4[unit]||GEO2[unit]; return u?u.name:unit; }
 function setYear(y){
   YEAR = y===2 ? 2 : 4;
   const two = YEAR===2;
   MU=two?MU2:MU4; MATHS_ORDER=two?MATHS_ORDER2:MATHS_ORDER4; SCI=two?SCI2:SCI4; SCI_ORDER=two?SCI_ORDER2:SCI_ORDER4;
   NOW_UNITS=two?NOW_UNITS2:NOW_UNITS4; SPELL_PLAN=two?SPELL_PLAN2:SPELL_PLAN4; WRITE_PLAN=two?WRITE_PLAN2:WRITE_PLAN4; MTC=two?MTC2:MTC4;
   SUBJECTS.maths.units=MU; SUBJECTS.maths.order=MATHS_ORDER; SUBJECTS.science.units=SCI; SUBJECTS.science.order=SCI_ORDER; SUBJECTS.mtc.name=MTC.name;
+  HIS=two?HIS2:HIS4; HIS_ORDER=two?HIS_ORDER2:HIS_ORDER4; GEO=two?GEO2:GEO4; GEO_ORDER=two?GEO_ORDER2:GEO_ORDER4; READ=two?READ2:READ4;
+  SUBJECTS.history.units=HIS; SUBJECTS.history.order=HIS_ORDER; SUBJECTS.geography.units=GEO; SUBJECTS.geography.order=GEO_ORDER;
 }
 function getLevel(subject,unit){ return data.levels[qKey(subject,unit)]||1; }
 function buildMTC(){
@@ -1195,7 +1630,9 @@ function buildTest(subject, unit, level, boost){
   if(subject==='mtc') return buildMTC();
   const key=qKey(subject,unit), rev=reviewFor(key, boost?1:3);
   let qs;
-  if(subject==='science'){ qs=buildScience(unit, Math.min(level,3), boost).filter(q=>!rev.some(r=>r.item===q.item)).slice(0,10-rev.length); }
+  if(subject==='history'||subject==='geography'){ qs=buildBank(subject, unit, Math.min(level,3), boost).filter(q=>!rev.some(r=>r.item===q.item)).slice(0,10-rev.length); }
+  else if(subject==='reading'){ return buildReading(Math.min(level,3), boost); }
+  else if(subject==='science'){ qs=buildScience(unit, Math.min(level,3), boost).filter(q=>!rev.some(r=>r.item===q.item)).slice(0,10-rev.length); }
   else {
     let makers;
     if(subject==='maths'){ const L=Math.min(level,6); makers=(unit==='mixed'?MATHS_ORDER:[unit]).map(k=>()=>tagQ(unitQ(k,L,boost),'maths:'+k)); }
@@ -1285,6 +1722,8 @@ function renderHome(){
   $('#starsHome').textContent='⭐ '+data.stars;
   const dm=daily(); $('#missionCard').innerHTML=`<div class="game-card"><span class="emoji">🎯</span><div style="flex:1"><b style="font-size:18px">Today’s mission: finish 3 quizzes</b><div class="mbar"><div style="width:${Math.min(100,dm.done/3*100)}%"></div></div><div class="locked">${dm.claimed?'Done! +15 bonus stars today 🎉':`${Math.min(dm.done,3)} of 3 done · prize: 15 bonus stars ⭐`}</div></div></div>`;
   $('#lvlSpelling').textContent=levelLabel(getLevel('spelling'),3);
+  $('#lvlReading').textContent=levelLabel(getLevel('reading'),3)+' · short stories and facts';
+  $('#lvlHistory').textContent=HIS_ORDER.length+' topics'; $('#lvlGeography').textContent=GEO_ORDER.length+' topics';
   $('#lvlWriting').textContent=levelLabel(getLevel('writing'),3);
   const now=NOW_UNITS[halfTerm()];
   const nowM=now.filter(u=>MU[u]).map(u=>MU[u].name), nowS=now.filter(u=>SCI[u]).map(u=>SCI[u].name);
@@ -1494,12 +1933,12 @@ function renderParent(){
     <p class="empty">${mode==='cloud'?'Progress is saved to your Google account, so it works on any device you sign in on.':'Progress is saved in this browser only. Sign in with Google to keep it safe and use it on other devices.'}</p>
   </div>
   <div class="card"><h2>👤 ${String(player.name).replace(/</g,'&lt;')}’s settings</h2>
-    <p class="empty">School year: changing it switches to that year’s quizzes. Maths and science progress for each year is kept separately.</p>
+    <p class="empty">School year: changing it switches to that year’s quizzes. Topic progress for each year is kept separately.</p>
     <div class="yearbtns" id="pYear"><button data-y="2" class="${YEAR===2?'on':''}">Year 2</button><button data-y="4" class="${YEAR===4?'on':''}">Year 4</button></div>
     <div class="row" style="justify-content:flex-start"><button class="btn small" id="delPlayer">${delArmed?'Tap again to DELETE this player':'Delete this player'}</button></div>
     <p class="empty" id="pMsg"></p>
   </div>`;
-  document.querySelectorAll('#pYear button').forEach(b=>b.onclick=async()=>{ const y=+b.dataset.y; if(y===YEAR) return; ['spelling','writing'].forEach(k=>delete data.levels[k]); data.mtcBest=null; setYear(y); save(); try{ await updatePlayer({year:y}); }catch(e){ $('#pMsg').textContent='Couldn’t save the year change. Please try again.'; return; } renderParent(); });
+  document.querySelectorAll('#pYear button').forEach(b=>b.onclick=async()=>{ const y=+b.dataset.y; if(y===YEAR) return; ['spelling','writing','reading','history:mixed','geography:mixed'].forEach(k=>delete data.levels[k]); data.mtcBest=null; setYear(y); save(); try{ await updatePlayer({year:y}); }catch(e){ $('#pMsg').textContent='Couldn’t save the year change. Please try again.'; return; } renderParent(); });
   $('#delPlayer').onclick=async()=>{ if(!delArmed){ delArmed=true; renderParent(); return; } delArmed=false; try{ await removePlayer(player.id); player=null; dirty=false; parentOK=false; showPlayers(); }catch(e){ $('#pMsg').textContent='Couldn’t delete. Please try again.'; } };
   $('#giveTicket').onclick=()=>{ data.tickets++; save(); $('#giveTicket').textContent='Ticket added ✓'; };
   $('#newPin').onclick=()=>{ data.pin=null; parentOK=false; save(); renderParent(); };
@@ -1988,6 +2427,9 @@ $('#goMaths').onclick=()=>renderTopics('maths');
 $('#goScience').onclick=()=>renderTopics('science');
 $('#goSpelling').onclick=()=>startTest('spelling');
 $('#goWriting').onclick=()=>startTest('writing');
+$('#goReading').onclick=()=>startTest('reading');
+$('#goHistory').onclick=()=>renderTopics('history');
+$('#goGeography').onclick=()=>renderTopics('geography');
 $('#goMtc').onclick=()=>startTest('mtc');
 $('#topicsBack').onclick=renderHome;
 $('#parentBtn').onclick=renderParent;
