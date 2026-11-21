@@ -204,6 +204,8 @@ canvas{display:block;width:100%;border-radius:20px;background:#1d1747;touch-acti
       <button class="subj" id="goReading"><span class="emoji">📖</span><div><b>Reading</b><span id="lvlReading"></span></div><span class="go">▶</span></button>
       <button class="subj" id="goHistory"><span class="emoji">🏰</span><div><b>History</b><span id="lvlHistory"></span></div><span class="go">▶</span></button>
       <button class="subj" id="goGeography"><span class="emoji">🗺️</span><div><b>Geography</b><span id="lvlGeography"></span></div><span class="go">▶</span></button>
+      <button class="subj" id="goFrench"><span class="emoji">🇫🇷</span><div><b>French</b><span id="lvlFrench"></span></div><span class="go">▶</span></button>
+      <button class="subj" id="goLife"><span class="emoji">💡</span><div><b>Computing, RE &amp; PSHE</b><span id="lvlLife"></span></div><span class="go">▶</span></button>
       <button class="subj" id="goSpelling"><span class="emoji">🔤</span><div><b>Spelling</b><span id="lvlSpelling"></span></div><span class="go">▶</span></button>
       <button class="subj" id="goWriting"><span class="emoji">✏️</span><div><b>Writing</b><span id="lvlWriting"></span></div><span class="go">▶</span></button>
       <button class="subj" id="goMtc"><span class="emoji">⏱</span><div><b id="mtcName">Times Tables Check</b><span id="lvlMtc"></span></div><span class="go">▶</span></button>
@@ -842,9 +844,9 @@ function homoQ(L){
   return tagSpell('homo:'+sent,'spell:homophones',mc(`Which word fits?<small style="font-size:22px;color:#2b2559">${sent.replace('___',BLANK)}</small>`, a, o, {say:sent.replace('___',a)}));
 }
 const SPELL_PLAN4 = {
-  1:Array(12).fill(spellQ),
-  2:[...Array(9).fill(spellQ), homoQ, homoQ, homoQ],
-  3:[...Array(8).fill(spellQ), homoQ, homoQ, homoQ, homoQ]
+  1:[...Array(7).fill(spellQ), ...Array(5).fill(()=>stat34Q())],
+  2:[...Array(5).fill(spellQ), ...Array(5).fill(()=>stat34Q()), homoQ, homoQ],
+  3:[...Array(4).fill(spellQ), ...Array(5).fill(()=>stat34Q()), homoQ, homoQ, homoQ]
 };
 
 /* =========================================================
@@ -1588,7 +1590,251 @@ function buildReading(L, boost){
   return out;
 }
 
+/* =========================================================
+   YEAR 3/4 STATUTORY SPELLING LIST (all 100 words)
+   [word, wrong1, wrong2]
+   ========================================================= */
+const STAT34=[
+ ['accident','acident','accidant'],['accidentally','accidently','acidentally'],['actual','actuel','acshual'],['actually','actualy','acshually'],['address','adress','addres'],
+ ['answer','anser','answere'],['appear','apear','appeer'],['arrive','arive','arrieve'],['believe','beleive','belive'],['bicycle','bicicle','bycycle'],
+ ['breath','breth','braeth'],['breathe','breeth','breathh'],['build','bild','biuld'],['busy','bizzy','buisy'],['business','buisness','bisness'],
+ ['calendar','calender','calandar'],['caught','cought','caugt'],['centre','senter','centr'],['century','sentury','centuary'],['certain','sertain','certin'],
+ ['circle','sircle','circel'],['complete','compleet','complet'],['consider','concider','considder'],['continue','continu','contineu'],['decide','deside','decied'],
+ ['describe','discribe','describ'],['different','diffrent','diferent'],['difficult','dificult','difficalt'],['disappear','dissapear','disapear'],['early','erly','earley'],
+ ['earth','erth','urth'],['eight','eigt','iete'],['eighth','eigth','eightth'],['enough','enuff','enouf'],['exercise','excercise','exersize'],
+ ['experience','experiance','expirience'],['experiment','expiriment','experament'],['extreme','extreem','extrem'],['famous','famus','fameous'],['favourite','favorit','favourit'],
+ ['February','Febuary','Febrary'],['forward','foward','forword'],['fruit','frute','fruet'],['grammar','grammer','gramar'],['group','groop','grupe'],
+ ['guard','gard','gaurd'],['guide','gide','guied'],['heard','heared','hurd'],['heart','hart','haert'],['height','hight','heigth'],
+ ['history','histery','histroy'],['imagine','imagin','emagine'],['increase','increese','encrease'],['important','importent','importunt'],['interest','intrest','interist'],
+ ['island','iland','islund'],['knowledge','knowlege','nolledge'],['learn','lern','learne'],['length','lenth','lengh'],['library','libary','liberry'],
+ ['material','matirial','materiel'],['medicine','medisin','medecine'],['mention','menshun','mension'],['minute','minit','minnute'],['natural','nateral','natchural'],
+ ['naughty','norty','naughtey'],['notice','notise','notis'],['occasion','ocasion','occassion'],['occasionally','ocasionally','occasionaly'],['often','offen','ofton'],
+ ['opposite','oposite','opposit'],['ordinary','ordinery','ordnary'],['particular','perticular','particuler'],['peculiar','peculier','pecular'],['perhaps','prehaps','perhapps'],
+ ['popular','populer','popeler'],['position','posision','possition'],['possess','posess','possses'],['possession','posession','possesion'],['possible','possable','posible'],
+ ['potatoes','potatos','potatoe'],['pressure','presure','preshure'],['probably','probly','probabley'],['promise','promis','promice'],['purpose','perpose','purpos'],
+ ['quarter','quater','qaurter'],['question','qestion','questun'],['recent','recint','reasent'],['regular','reguler','regulr'],['reign','reighn','riegn'],
+ ['remember','rember','remeber'],['sentence','sentance','sentense'],['separate','seperate','separete'],['special','spesial','specail'],['straight','straite','straigt'],
+ ['strange','strainge','strang'],['strength','strenth','strengh'],['suppose','supose','suppos'],['surprise','suprise','surprize'],['therefore','therefor','thereforr'],
+ ['though','thow','thogh'],['although','althogh','allthough'],['thought','thougt','thort'],['through','throo','throgh'],['various','varius','vairious'],
+ ['weight','wieght','weigth'],['woman','wooman','womun'],['women','wimmen','womin']
+];
+function stat34Q(){
+  const fresh=STAT34.filter(w=>!isMastered('stat34:'+w[0]));
+  const [w,...miss]=pick(fresh.length?fresh:STAT34);
+  return tagSpell('stat34:'+w,'spell:yr34list',mc('Which spelling is right? <small>(Year 3/4 word list)</small>', w, miss, {say:`Spell: ${w}. ... ${w}.`}));
+}
+
+/* =========================================================
+   FRENCH (Year 4) — follows the school's half-term topics
+   ========================================================= */
+const FR4={
+ frhello:{name:'Hello & numbers',emoji:'👋',q:[
+  [1,'What does “bonjour” mean?','hello','goodbye','please','thank you'],
+  [1,'What does “au revoir” mean?','goodbye','hello','yes','sorry'],
+  [1,'How do you say “thank you” in French?','merci','s’il vous plaît','oui','non'],
+  [1,'What is “trois” in English?','three','two','four','ten'],
+  [1,'How do you say “yes” in French?','oui','non','si','ja'],
+  [2,'“Je m’appelle Sienna” means…','My name is Sienna','I live in Sienna','I like Sienna','Sienna is happy'],
+  [2,'“Où habites-tu?” means…','Where do you live?','How old are you?','What is your name?','How are you?'],
+  [2,'“J’habite à Londres” means…','I live in London','I like London','I am going to London','London is big'],
+  [2,'What is “cinquante” in English?','50','15','5','500'],
+  [2,'What is “quarante” in English?','40','4','14','400'],
+  [3,'What is “soixante” in English?','60','16','70','6'],
+  [3,'What is “cent” in English?','100','1,000','10','50'],
+  [3,'How do you say “80” in French?','quatre-vingts','huitante','soixante','cent'],
+  [3,'What is “deux cents” in English?','200','20','2','2,000'],
+  [3,'“Ça va?” means…','How are you?','Where are you?','Who are you?','What time is it?']]},
+ frschool:{name:'At school',emoji:'🏫',q:[
+  [1,'What is “un crayon”?','a pencil','a ruler','a book','a bag'],
+  [1,'What is “un livre”?','a book','a pen','a chair','a door'],
+  [1,'What is “une règle”?','a ruler','a rubber','a rule book','a road'],
+  [1,'What is “l’école”?','school','the classroom','the teacher','homework'],
+  [1,'What is “une gomme”?','a rubber','a glue stick','a pencil case','a game'],
+  [2,'What is “une trousse”?','a pencil case','a trouser','a bag','a lunchbox'],
+  [2,'What is “le professeur”?','the teacher','the head teacher','the pupil','the professor of maths only'],
+  [2,'“J’aime les maths” means…','I like maths','I hate maths','I do maths','maths is hard'],
+  [2,'What is “les sciences”?','science','history','sport','art'],
+  [2,'“Je n’aime pas” means…','I don’t like','I like','I love','I have'],
+  [3,'What is “l’éducation physique” (EPS)?','PE','music','geography','English'],
+  [3,'What is “la géographie”?','geography','geometry','history','art'],
+  [3,'“Ma matière préférée, c’est l’histoire” means…','My favourite subject is history','My teacher likes history','I don’t like history','History is long'],
+  [3,'What is “un cahier”?','an exercise book','a calculator','a chair','a computer'],
+  [3,'What is “une calculatrice”?','a calculator','a calendar','a clock','a crayon']]},
+ frtown:{name:'In town',emoji:'🏙️',q:[
+  [1,'What is “la boulangerie”?','the bakery','the bank','the library','the beach'],
+  [1,'What is “la piscine”?','the swimming pool','the pizza shop','the park','the police station'],
+  [1,'What is “le parc”?','the park','the car park','the post office','the shop'],
+  [1,'What is “la gare”?','the train station','the garage','the garden','the cinema'],
+  [1,'What is “le cinéma”?','the cinema','the church','the school','the market'],
+  [2,'What is “le marché”?','the market','the march','the museum','the castle'],
+  [2,'What is “la bibliothèque”?','the library','the bookshop','the bakery','the hospital'],
+  [2,'“Il y a un parc” means…','There is a park','I like the park','Go to the park','The park is big'],
+  [2,'What is “le château”?','the castle','the cat','the hat shop','the chapel'],
+  [2,'What is “l’hôpital”?','the hospital','the hotel','the house','the hill'],
+  [3,'“Tournez à gauche” means…','turn left','turn right','go straight on','stop'],
+  [3,'“Tournez à droite” means…','turn right','turn left','go straight on','cross the road'],
+  [3,'“Allez tout droit” means…','go straight on','go back','turn around','go up'],
+  [3,'What is “la mairie”?','the town hall','the sea','the mayor’s car','the market'],
+  [3,'“Il n’y a pas de cinéma” means…','There isn’t a cinema','There is a cinema','I like the cinema','The cinema is closed']]},
+ frtime:{name:'Time & weather',emoji:'🌤️',q:[
+  [1,'“Il fait chaud” means…','It is hot','It is cold','It is windy','It is raining'],
+  [1,'“Il fait froid” means…','It is cold','It is hot','It is sunny','It is foggy'],
+  [1,'“Il pleut” means…','It is raining','It is snowing','It is windy','It is hot'],
+  [1,'“Il neige” means…','It is snowing','It is raining','It is sunny','It is night'],
+  [1,'“Il fait du soleil” means…','It is sunny','It is windy','It is foggy','It is cold'],
+  [2,'“Il fait du vent” means…','It is windy','It is wet','It is warm','It is cloudy'],
+  [2,'“Quelle heure est-il?” means…','What time is it?','What is the weather?','How old are you?','Where is it?'],
+  [2,'“Il est trois heures” means…','It is three o’clock','It is three minutes','It is Wednesday','I am three'],
+  [2,'“Il est midi” means…','It is midday','It is midnight','It is Monday','It is morning'],
+  [2,'What is “lundi”?','Monday','Tuesday','moon','Sunday'],
+  [3,'“Il est deux heures et demie” means…','It is half past two','It is quarter past two','It is two o’clock','It is twelve'],
+  [3,'“Il est quatre heures et quart” means…','It is quarter past four','It is quarter to four','It is half past four','It is fourteen'],
+  [3,'What is “minuit”?','midnight','a minute','midday','a minute hand'],
+  [3,'What is “samedi”?','Saturday','Sunday','Monday','Friday'],
+  [3,'“Il y a du brouillard” means…','It is foggy','There is a storm','It is sunny','It is icy']]},
+ frfood:{name:'Food & café',emoji:'🥐',q:[
+  [1,'What is “le pain”?','bread','pain','paint','a pan'],
+  [1,'What is “une pomme”?','an apple','a potato','a plum','a pear'],
+  [1,'What is “le fromage”?','cheese','milk','butter','ham'],
+  [1,'What is “le lait”?','milk','late','lemonade','tea'],
+  [1,'What is “une glace”?','an ice cream','a glass','a cake','a sweet'],
+  [2,'“J’aime le chocolat” means…','I like chocolate','I want chocolate','I hate chocolate','chocolate is mine'],
+  [2,'“Je voudrais un croissant” means…','I would like a croissant','I have a croissant','I made a croissant','I like croissants'],
+  [2,'What is “un jus d’orange”?','an orange juice','an orange','a jam','an orange cake'],
+  [2,'What does “s’il vous plaît” mean?','please','thank you','sorry','hello'],
+  [2,'What is “l’euro”?','the money used in France','a French town','a type of bread','a café'],
+  [3,'“C’est combien?” means…','How much is it?','What is it?','Who is it?','How many are there?'],
+  [3,'“Ça coûte deux euros” means…','It costs two euros','I have two euros','Two coffees please','It is two o’clock'],
+  [3,'What is “une crêpe”?','a pancake','a crisp','a cream cake','a cracker'],
+  [3,'“Je n’aime pas les carottes” means…','I don’t like carrots','I like carrots','I eat carrots','Carrots are orange'],
+  [3,'What is “l’addition” in a café?','the bill','adding up homework','a drink','the menu']]},
+ frclothes:{name:'Clothes & colours',emoji:'👕',q:[
+  [1,'What colour is “rouge”?','red','blue','green','pink'],
+  [1,'What colour is “bleu”?','blue','black','brown','yellow'],
+  [1,'What colour is “vert”?','green','grey','white','red'],
+  [1,'What colour is “jaune”?','yellow','orange','purple','green'],
+  [1,'What colour is “noir”?','black','white','brown','grey'],
+  [2,'What is “un pantalon”?','trousers','a jumper','a hat','a coat'],
+  [2,'What is “un chapeau”?','a hat','a shoe','a castle','a scarf'],
+  [2,'What is “une robe”?','a dress','a robot','a skirt','a coat'],
+  [2,'What is “un pull”?','a jumper','a pool','a pullover hat','socks'],
+  [2,'What is “des chaussures”?','shoes','socks','gloves','shorts'],
+  [3,'“Je porte un t-shirt rouge” means…','I am wearing a red T-shirt','I like red T-shirts','I have a red bag','The T-shirt is new'],
+  [3,'What is “une jupe”?','a skirt','a jacket','a juice','a jumper'],
+  [3,'What is “un manteau”?','a coat','a mountain','a hat','a glove'],
+  [3,'How do you say “a blue jumper” in French?','un pull bleu','un bleu pull','une pull bleue','le bleu pull'],
+  [3,'What is “une écharpe”?','a scarf','a sock','a belt','a shirt']]}
+};
+const FR_ORDER4=['frhello','frschool','frtown','frtime','frfood','frclothes'];
+
+/* =========================================================
+   COMPUTING, RE & PSHE ("Life & tech")
+   ========================================================= */
+const LIFE4={
+ comp4:{name:'Computing & online safety',emoji:'💻',q:[
+  [1,'What is an algorithm?','a set of step-by-step instructions','a type of computer','a game','a password'],
+  [1,'What should you do if something online upsets you?','tell a trusted grown-up','keep it secret','reply angrily','share it'],
+  [1,'Which of these should you keep private online?','your home address','your favourite colour','your favourite animal','your favourite book'],
+  [1,'A good password should be…','hard to guess and kept secret','your name','“1234”','shared with friends'],
+  [1,'What is a bug in a program?','a mistake that stops it working properly','an insect in the computer','a type of game','a mouse'],
+  [2,'Fixing mistakes in a program is called…','debugging','downloading','deleting','drawing'],
+  [2,'Which of these is an input device?','a keyboard','a speaker','a printer','a screen'],
+  [2,'Which of these is an output device?','a printer','a mouse','a keyboard','a microphone'],
+  [2,'In Scratch, a “repeat” block is a…','loop','bug','sprite','sound'],
+  [2,'Should you meet someone in real life that you only know online?','no, not without a trusted grown-up','yes, straight away','yes, if they are nice','yes, if they send a photo'],
+  [3,'What is the internet?','a huge network of connected computers','one big computer','a website','a games console'],
+  [3,'What does a search engine do?','helps you find web pages','sends emails','takes photos','prints pages'],
+  [3,'Not everything online is…','true','colourful','fast','free to look at'],
+  [3,'A program that does something only “if” something is true uses…','selection (if…then)','a loop','a bug','a sprite'],
+  [3,'Why should you ask before using someone else’s photo online?','it belongs to them','it is too big','photos are slow','it might break the computer']]},
+ re4:{name:'Religions & festivals',emoji:'🕊️',q:[
+  [1,'Which festival do Christians celebrate as the birth of Jesus?','Christmas','Diwali','Eid','Passover'],
+  [1,'Diwali, the festival of lights, is celebrated by…','Hindus and Sikhs','only Christians','only Jews','nobody'],
+  [1,'Which festival marks the end of Ramadan for Muslims?','Eid al-Fitr','Easter','Hanukkah','Holi'],
+  [1,'Hanukkah, when candles are lit for 8 nights, is a festival in…','Judaism','Buddhism','Sikhism','Hinduism'],
+  [1,'What is the Christian holy book called?','the Bible','the Qur’an','the Torah only','the Guru Granth Sahib'],
+  [2,'What is the Muslim holy book called?','the Qur’an','the Bible','the Vedas','the Torah'],
+  [2,'Where do Jewish people worship?','a synagogue','a mosque','a gurdwara','a temple only'],
+  [2,'Where do Muslims worship?','a mosque','a church','a synagogue','a gurdwara'],
+  [2,'Where do Sikhs worship?','a gurdwara','a mosque','a church','a synagogue'],
+  [2,'At Easter, Christians remember that Jesus…','died and came back to life','was born','built a church','wrote the Bible'],
+  [3,'What is Ramadan?','a month when many Muslims fast in daylight hours','a Hindu festival of colours','a Christian prayer','a Jewish meal'],
+  [3,'Who founded Buddhism?','the Buddha (Siddhartha Gautama)','Guru Nanak','Moses','Jesus'],
+  [3,'Holi, the festival of colours, celebrates the arrival of spring in…','Hinduism','Judaism','Christianity','Islam'],
+  [3,'What is the Sikh holy book called?','the Guru Granth Sahib','the Qur’an','the Bible','the Torah'],
+  [3,'Shabbat, the Jewish day of rest, starts on…','Friday evening','Monday morning','Sunday lunchtime','Wednesday night']]},
+ pshe4:{name:'Healthy, safe & kind',emoji:'💚',q:[
+  [1,'What number do you call in the UK in an emergency?','999','111','123','000'],
+  [1,'Which of these is a healthy snack?','an apple','a bag of sweets','a can of cola','a doughnut'],
+  [1,'About how many hours of sleep do 8-year-olds need?','9 to 12 hours','3 hours','5 hours','15 hours'],
+  [1,'What should you do before crossing the road?','stop, look and listen','run quickly','look at your phone','close your eyes'],
+  [1,'If a friend is sad, a kind thing to do is…','ask if they are OK','laugh at them','ignore them','tell everyone'],
+  [2,'Why is exercise good for you?','it keeps your heart and body strong','it makes you sleepy all day','it makes you hungry for sweets','it is not good for you'],
+  [2,'What does “Stop, think, choose” help you do?','make a good decision when you feel cross','run faster','do maths','go to sleep'],
+  [2,'Who are good people to talk to if you are worried?','a parent, carer or teacher','a stranger online','nobody','a pet only'],
+  [2,'How much of your plate should be fruit and vegetables?','about a third or more','none','just one pea','all of it should be cake'],
+  [2,'What is a feeling?','how you feel inside, like happy or worried','a type of food','a game','a sport'],
+  [3,'What is the difference between a good secret and a bad secret?','a bad secret makes you feel worried or unsafe','there is no difference','good secrets are longer','bad secrets are funny'],
+  [3,'Why should you wash your hands after the toilet?','to wash away germs','to make them warm','to make them smell','to save water'],
+  [3,'What is peer pressure?','feeling pushed by friends to do something','pressing a button','a type of exercise','a kind of homework'],
+  [3,'Which of these helps when you feel angry?','taking deep breaths','shouting at someone','breaking things','hiding forever'],
+  [3,'Why should you wear a helmet on a bike?','to protect your head if you fall','to look cool','to keep warm','because it is a hat']]}
+};
+const LIFE_ORDER4=['comp4','re4','pshe4'];
+const LIFE2={
+ comp2:{name:'Computing & online safety',emoji:'💻',q:[
+  [1,'What is an algorithm?','a list of steps to follow','a type of animal','a toy','a song'],
+  [1,'If something online makes you feel worried, you should…','tell a grown-up you trust','keep it a secret','turn the volume up','show your friends'],
+  [1,'Which of these is a computer?','a tablet','a teddy','a book','a pencil'],
+  [1,'What do you use to type letters on a computer?','a keyboard','a speaker','a screen','a printer'],
+  [1,'Should you tell people online where you live?','no','yes','only if they ask nicely','yes, always'],
+  [2,'A floor robot like Bee-Bot follows…','instructions you give it','its own ideas','the sun','music'],
+  [2,'What do we call a mistake in instructions?','a bug','a beetle','a crash','a click'],
+  [2,'Before using a new game or website you should…','ask a grown-up','just click everything','give your password','turn it off and on'],
+  [2,'What is a password for?','keeping your things private','making the screen bright','playing music','printing'],
+  [2,'What does a mouse do on a computer?','moves the pointer and clicks','eats cheese','prints pages','takes photos'],
+  [3,'If you change the order of steps in an algorithm…','the result might change','nothing ever happens','the computer breaks','it becomes a song'],
+  [3,'Is everything you see online true?','no','yes','only pictures are','only videos are'],
+  [3,'What does “log off” mean?','sign out when you have finished','throw away the computer','start a game','charge the tablet'],
+  [3,'Which is kind online?','saying nice things','calling people names','sharing someone’s photo without asking','being rude in games'],
+  [3,'A robot moves forward 2, then forward 3. How many steps altogether?','5','6','1','23']]},
+ re2:{name:'Faiths & festivals',emoji:'🕊️',q:[
+  [1,'At Christmas, Christians celebrate the birth of…','Jesus','Buddha','Moses','Guru Nanak'],
+  [1,'Diwali is a festival of…','lights','snow','pancakes','eggs'],
+  [1,'Which festival has chocolate eggs?','Easter','Diwali','Eid','Hanukkah'],
+  [1,'A church is a place where … worship.','Christians','Muslims','Sikhs','Hindus'],
+  [1,'Eid is a festival celebrated by…','Muslims','Christians','Jews','Buddhists'],
+  [2,'What is the Christian holy book?','the Bible','the Qur’an','the Torah','a dictionary'],
+  [2,'How many candles are on a Hanukkah menorah (with the helper candle)?','9','2','20','100'],
+  [2,'A mosque is a place where … worship.','Muslims','Christians','Jews','Sikhs'],
+  [2,'Which story is from the Bible?','Noah’s Ark','Little Red Riding Hood','The Gruffalo','Cinderella'],
+  [2,'Rangoli patterns are made at…','Diwali','Christmas','Easter','Bonfire Night'],
+  [3,'Jewish people celebrate the start of their new year at…','Rosh Hashanah','Christmas','Diwali','Eid'],
+  [3,'Sikhs worship in a…','gurdwara','mosque','church','synagogue'],
+  [3,'What is the Muslim holy book called?','the Qur’an','the Bible','the Torah','the Vedas'],
+  [3,'What do many people do at harvest festival?','give thanks for food and share it','eat chocolate eggs','light fireworks','build snowmen'],
+  [3,'The story of Rama and Sita is told at…','Diwali','Easter','Hanukkah','Christmas']]},
+ pshe2:{name:'Healthy, safe & kind',emoji:'💚',q:[
+  [1,'What number do you ring in an emergency?','999','123','100','555'],
+  [1,'Which of these is a healthy food?','carrots','sweets','crisps','cola'],
+  [1,'What should you do before you eat?','wash your hands','play outside','jump up and down','go to sleep'],
+  [1,'How often should you brush your teeth?','twice a day','once a week','never','once a year'],
+  [1,'What should you do when crossing the road?','hold a grown-up’s hand and look both ways','run across','close your eyes','play on your phone'],
+  [2,'If a friend falls over, you could…','help them and get a grown-up','laugh','walk away','take their toy'],
+  [2,'Why do we need sleep?','to help our bodies grow and rest','to get hungry','to make it dark','because it is boring'],
+  [2,'Which of these is a feeling?','happy','table','orange','car'],
+  [2,'What should you do if you get lost in a shop?','find a shop worker or a mum with children','leave the shop','hide','cry quietly and wait for night'],
+  [2,'Water is the best drink because…','it keeps your body healthy','it has lots of sugar','it is fizzy','it is sweet'],
+  [3,'Who are the people you can trust to help you?','family, teachers and police officers','strangers in cars','people online','nobody'],
+  [3,'What is a good way to calm down when you are cross?','take deep breaths and count to ten','shout loudly','hit something','stamp your feet'],
+  [3,'Which of these keeps you safe in the sun?','sun cream and a hat','a coat and scarf','sunglasses only at night','nothing'],
+  [3,'Why should you not take medicine on your own?','only a grown-up should give medicine','it tastes bad','it is too small','it is for pets'],
+  [3,'What makes a good friend?','being kind and taking turns','always winning','being bossy','not sharing']]}
+};
+const LIFE_ORDER2=['comp2','re2','pshe2'];
+
 /* ---------- which year is playing ---------- */
+let LIFE=LIFE4, LIFE_ORDER=LIFE_ORDER4;
 let HIS=HIS4, HIS_ORDER=HIS_ORDER4, GEO=GEO4, GEO_ORDER=GEO_ORDER4, READ=READ4;
 let YEAR=4, MU=MU4, MATHS_ORDER=MATHS_ORDER4, SCI=SCI4, SCI_ORDER=SCI_ORDER4, NOW_UNITS=NOW_UNITS4, SPELL_PLAN=SPELL_PLAN4, WRITE_PLAN=WRITE_PLAN4;
 const MTC4={name:'Times Tables Check',n:25,t:6,tables:[2,3,4,5,6,7,8,9,10,11,12],hard:[6,7,8,9,12],maxB:12};
@@ -1602,12 +1848,14 @@ const SUBJECTS={
   history:{name:'History',emoji:'🏰',max:3,units:HIS,order:HIS_ORDER},
   geography:{name:'Geography',emoji:'🗺️',max:3,units:GEO,order:GEO_ORDER},
   reading:{name:'Reading',emoji:'📖',max:3},
+  french:{name:'French',emoji:'🇫🇷',max:3,units:FR4,order:FR_ORDER4},
+  life:{name:'Computing, RE & PSHE',emoji:'💡',max:3,units:LIFE,order:LIFE_ORDER},
   spelling:{name:'Spelling',emoji:'🔤',max:3},
   writing:{name:'Writing',emoji:'✏️',max:3},
   mtc:{name:'Times Tables Check',emoji:'⏱',max:0}
 };
 const qKey=(subject,unit)=>unit?subject+':'+unit:subject;
-function unitName(subject,unit){ if(!unit) return ''; if(unit==='mixed') return 'Mixed'; const u=((SUBJECTS[subject]||{}).units||{})[unit]||MU4[unit]||MU2[unit]||SCI4[unit]||SCI2[unit]||HIS4[unit]||HIS2[unit]||GEO4[unit]||GEO2[unit]; return u?u.name:unit; }
+function unitName(subject,unit){ if(!unit) return ''; if(unit==='mixed') return 'Mixed'; const u=((SUBJECTS[subject]||{}).units||{})[unit]||MU4[unit]||MU2[unit]||SCI4[unit]||SCI2[unit]||HIS4[unit]||HIS2[unit]||GEO4[unit]||GEO2[unit]||FR4[unit]||LIFE4[unit]||LIFE2[unit]; return u?u.name:unit; }
 function setYear(y){
   YEAR = y===2 ? 2 : 4;
   const two = YEAR===2;
@@ -1615,6 +1863,7 @@ function setYear(y){
   NOW_UNITS=two?NOW_UNITS2:NOW_UNITS4; SPELL_PLAN=two?SPELL_PLAN2:SPELL_PLAN4; WRITE_PLAN=two?WRITE_PLAN2:WRITE_PLAN4; MTC=two?MTC2:MTC4;
   SUBJECTS.maths.units=MU; SUBJECTS.maths.order=MATHS_ORDER; SUBJECTS.science.units=SCI; SUBJECTS.science.order=SCI_ORDER; SUBJECTS.mtc.name=MTC.name;
   HIS=two?HIS2:HIS4; HIS_ORDER=two?HIS_ORDER2:HIS_ORDER4; GEO=two?GEO2:GEO4; GEO_ORDER=two?GEO_ORDER2:GEO_ORDER4; READ=two?READ2:READ4;
+  LIFE=two?LIFE2:LIFE4; LIFE_ORDER=two?LIFE_ORDER2:LIFE_ORDER4; SUBJECTS.life.units=LIFE; SUBJECTS.life.order=LIFE_ORDER;
   SUBJECTS.history.units=HIS; SUBJECTS.history.order=HIS_ORDER; SUBJECTS.geography.units=GEO; SUBJECTS.geography.order=GEO_ORDER;
 }
 function getLevel(subject,unit){ return data.levels[qKey(subject,unit)]||1; }
@@ -1630,7 +1879,7 @@ function buildTest(subject, unit, level, boost){
   if(subject==='mtc') return buildMTC();
   const key=qKey(subject,unit), rev=reviewFor(key, boost?1:3);
   let qs;
-  if(subject==='history'||subject==='geography'){ qs=buildBank(subject, unit, Math.min(level,3), boost).filter(q=>!rev.some(r=>r.item===q.item)).slice(0,10-rev.length); }
+  if(subject==='history'||subject==='geography'||subject==='french'||subject==='life'){ qs=buildBank(subject, unit, Math.min(level,3), boost).filter(q=>!rev.some(r=>r.item===q.item)).slice(0,10-rev.length); }
   else if(subject==='reading'){ return buildReading(Math.min(level,3), boost); }
   else if(subject==='science'){ qs=buildScience(unit, Math.min(level,3), boost).filter(q=>!rev.some(r=>r.item===q.item)).slice(0,10-rev.length); }
   else {
@@ -1723,6 +1972,8 @@ function renderHome(){
   const dm=daily(); $('#missionCard').innerHTML=`<div class="game-card"><span class="emoji">🎯</span><div style="flex:1"><b style="font-size:18px">Today’s mission: finish 3 quizzes</b><div class="mbar"><div style="width:${Math.min(100,dm.done/3*100)}%"></div></div><div class="locked">${dm.claimed?'Done! +15 bonus stars today 🎉':`${Math.min(dm.done,3)} of 3 done · prize: 15 bonus stars ⭐`}</div></div></div>`;
   $('#lvlSpelling').textContent=levelLabel(getLevel('spelling'),3);
   $('#lvlReading').textContent=levelLabel(getLevel('reading'),3)+' · short stories and facts';
+  $('#goFrench').style.display=YEAR===4?'':'none'; $('#lvlFrench').textContent=FR_ORDER4.length+' topics · from your school’s plan';
+  $('#lvlLife').textContent='Online safety, faiths & festivals, healthy & safe';
   $('#lvlHistory').textContent=HIS_ORDER.length+' topics'; $('#lvlGeography').textContent=GEO_ORDER.length+' topics';
   $('#lvlWriting').textContent=levelLabel(getLevel('writing'),3);
   const now=NOW_UNITS[halfTerm()];
@@ -1938,7 +2189,7 @@ function renderParent(){
     <div class="row" style="justify-content:flex-start"><button class="btn small" id="delPlayer">${delArmed?'Tap again to DELETE this player':'Delete this player'}</button></div>
     <p class="empty" id="pMsg"></p>
   </div>`;
-  document.querySelectorAll('#pYear button').forEach(b=>b.onclick=async()=>{ const y=+b.dataset.y; if(y===YEAR) return; ['spelling','writing','reading','history:mixed','geography:mixed'].forEach(k=>delete data.levels[k]); data.mtcBest=null; setYear(y); save(); try{ await updatePlayer({year:y}); }catch(e){ $('#pMsg').textContent='Couldn’t save the year change. Please try again.'; return; } renderParent(); });
+  document.querySelectorAll('#pYear button').forEach(b=>b.onclick=async()=>{ const y=+b.dataset.y; if(y===YEAR) return; ['spelling','writing','reading','history:mixed','geography:mixed','life:mixed'].forEach(k=>delete data.levels[k]); data.mtcBest=null; setYear(y); save(); try{ await updatePlayer({year:y}); }catch(e){ $('#pMsg').textContent='Couldn’t save the year change. Please try again.'; return; } renderParent(); });
   $('#delPlayer').onclick=async()=>{ if(!delArmed){ delArmed=true; renderParent(); return; } delArmed=false; try{ await removePlayer(player.id); player=null; dirty=false; parentOK=false; showPlayers(); }catch(e){ $('#pMsg').textContent='Couldn’t delete. Please try again.'; } };
   $('#giveTicket').onclick=()=>{ data.tickets++; save(); $('#giveTicket').textContent='Ticket added ✓'; };
   $('#newPin').onclick=()=>{ data.pin=null; parentOK=false; save(); renderParent(); };
@@ -2427,6 +2678,8 @@ $('#goMaths').onclick=()=>renderTopics('maths');
 $('#goScience').onclick=()=>renderTopics('science');
 $('#goSpelling').onclick=()=>startTest('spelling');
 $('#goWriting').onclick=()=>startTest('writing');
+$('#goFrench').onclick=()=>renderTopics('french');
+$('#goLife').onclick=()=>renderTopics('life');
 $('#goReading').onclick=()=>startTest('reading');
 $('#goHistory').onclick=()=>renderTopics('history');
 $('#goGeography').onclick=()=>renderTopics('geography');
