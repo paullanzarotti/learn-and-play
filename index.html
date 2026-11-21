@@ -68,6 +68,32 @@ td.n{font-weight:800}
 .unlock{background:linear-gradient(135deg,#fff4c2,#ffe0f0);border-radius:18px;padding:14px;text-align:center;font-weight:800;font-size:19px;margin-top:14px}
 .fact{background:#eaf7ff;border-radius:18px;padding:14px 16px;margin-top:14px}
 .fact b{display:block;margin-bottom:4px;color:#2a7ab8}
+.gold-fx{position:fixed;inset:0;z-index:35;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,#5a2fd1 0%,#1d0b4e 70%);color:#fff;text-align:center;padding:20px;overflow:hidden}
+.gold-fx .rays{position:absolute;width:900px;height:900px;background:repeating-conic-gradient(rgba(255,215,64,.18) 0 10deg,transparent 10deg 20deg);animation:spin 12s linear infinite;opacity:0;transition:opacity .6s}
+.gold-fx.open .rays{opacity:1}
+@keyframes spin{to{transform:rotate(360deg)}}
+.gold-egg{position:relative;width:170px;height:220px;cursor:pointer;animation:wobble .5s ease-in-out infinite;z-index:2}
+.gold-egg .half{position:absolute;left:0;width:170px;height:220px;border-radius:50% 50% 48% 48%/60% 60% 40% 40%;background:radial-gradient(circle at 35% 30%,#fffbe0,#ffd23f 45%,#e0a100);box-shadow:0 10px 40px rgba(255,210,63,.6)}
+.gold-egg .half::after{content:'';position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle at 30% 35%,#ff5fa2 0 9px,transparent 10px),radial-gradient(circle at 68% 52%,#5bc0ff 0 11px,transparent 12px),radial-gradient(circle at 42% 72%,#7cf2b0 0 8px,transparent 9px),radial-gradient(circle at 72% 24%,#b18cff 0 7px,transparent 8px)}
+.gold-egg .top{clip-path:polygon(0 0,100% 0,100% 46%,85% 52%,70% 44%,55% 53%,40% 45%,25% 54%,10% 46%,0 52%)}
+.gold-egg .bot{clip-path:polygon(0 52%,10% 46%,25% 54%,40% 45%,55% 53%,70% 44%,85% 52%,100% 46%,100% 100%,0 100%)}
+.gold-egg.shake{animation:shake .12s linear infinite}
+.gold-egg.crack .top{transition:transform .9s cubic-bezier(.2,.8,.3,1),opacity .9s;transform:translate(-60px,-260px) rotate(-50deg);opacity:0}
+.gold-egg.crack .bot{transition:transform .9s ease-in,opacity .9s;transform:translateY(260px);opacity:0}
+@keyframes wobble{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+@keyframes shake{0%{transform:translate(0,0) rotate(0)}25%{transform:translate(-6px,2px) rotate(-8deg)}50%{transform:translate(5px,-2px) rotate(7deg)}75%{transform:translate(-4px,1px) rotate(-5deg)}100%{transform:translate(0,0)}}
+.gold-ticket{position:absolute;z-index:3;width:300px;max-width:84vw;padding:22px 18px;border-radius:18px;background:linear-gradient(135deg,#fff2a8,#ffd23f 40%,#f5b400 60%,#fff2a8);color:#5a3b00;box-shadow:0 0 60px rgba(255,215,64,.9),0 12px 30px rgba(0,0,0,.4);transform:scale(0) rotate(-20deg);opacity:0;overflow:hidden;border:4px dashed #b07d00}
+.gold-ticket.show{transition:transform .9s cubic-bezier(.2,1.6,.4,1),opacity .4s;transform:scale(1) rotate(-3deg);opacity:1}
+.gold-ticket::before{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.8),transparent);transform:skewX(-20deg);animation:shine 2.2s ease-in-out infinite 1s}
+@keyframes shine{to{left:130%}}
+.gold-ticket h2{margin:4px 0;font-size:30px;letter-spacing:1px}
+.gold-fx .gmsg{position:relative;z-index:3;margin-top:24px;font-size:20px;font-weight:800;opacity:0;transition:opacity .6s .6s}
+.gold-fx.open .gmsg{opacity:1}
+.gold-fx .gbtn{position:relative;z-index:3;margin-top:16px;opacity:0;transition:opacity .6s 1.2s}
+.gold-fx.open .gbtn{opacity:1}
+.goldcard{background:linear-gradient(135deg,#fff7c7,#ffe270);border:3px solid #f0c000}
+.adultbox{background:#fff;color:#2b2559;border-radius:20px;padding:20px;max-width:380px;width:100%;position:relative;z-index:3;text-align:left}
+.adultbox input{font-size:24px;padding:10px 12px;border-radius:12px;border:3px solid #d9d4ff;width:100%;box-sizing:border-box;font-family:inherit;margin:10px 0}
 .confetti{position:fixed;top:-20px;width:10px;height:14px;border-radius:2px;z-index:40;animation:fall linear forwards;pointer-events:none}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
 #game .wrap{padding-top:10px}
@@ -198,6 +224,7 @@ canvas{display:block;width:100%;border-radius:20px;background:#1d1747;touch-acti
     <div class="top"><h1 id="homeTitle">My Quest 🚀</h1><div class="pill" id="starsHome">⭐ 0</div></div>
     <div class="row" style="justify-content:space-between;margin:-4px 0 6px"><span class="pill" id="yearPill" style="font-size:14px">Year 4</span><button class="btn alt small" id="switchPlayer">👥 Switch player</button></div>
     <p class="hello">Pick a quiz. Score <b>9 or 10</b> to unlock a game!</p>
+    <div class="card goldcard" id="goldCard" style="margin:8px 0 12px"></div>
     <div class="subjects">
       <button class="subj" id="goMaths"><span class="emoji">🔢</span><div><b>Maths</b><span id="lvlMaths"></span></div><span class="go">▶</span></button>
       <button class="subj" id="goScience"><span class="emoji">🔬</span><div><b>Science</b><span id="lvlScience"></span></div><span class="go">▶</span></button>
@@ -1581,24 +1608,46 @@ const READ4=[
 ];
 
 /* builders */
+/* Variety: the same fact can come up as a normal question, a True/False,
+   or (for languages) the other way round. Recently seen questions go to the back. */
+const VOCAB_RE=/^What (?:is|are|colour is) “([^”]+)”\??$|^What does “([^”]+)” mean\?$/;
+function bankVariant(subject, row, unitRows){
+  const [,q,a,...o]=row;
+  const longest=o.every(w=>a.length>w.length);
+  const lang=subject==='french'?'French':subject==='spanish'?'Spanish':'';
+  const r=Math.random();
+  const mm=lang&&q.match(VOCAB_RE);
+  if(mm && r<0.35){
+    const fw=mm[1]||mm[2];
+    const others=[...new Set(unitRows.map(x=>{ const m2=x[1].match(VOCAB_RE); return m2&&(m2[1]||m2[2]); }).filter(x=>x&&x!==fw))];
+    if(others.length>=3){ const m=mc(`How do you say <b>${a}</b> in ${lang}?`, fw, shuffle(others).slice(0,3), {say:`How do you say ${a} in ${lang}?`}); m.flText=''; return m; }
+  }
+  if(r < (longest?0.45:0.18)){
+    const truth=Math.random()<0.5, cand=truth?a:pick(o);
+    return mc(`<span class="tfq">True or false?</span><br>${q}<br><span style="display:inline-block;margin-top:8px;background:#fff4c2;border-radius:10px;padding:4px 10px">➡️ ${cand}</span>`, truth?'True':'False', [truth?'False':'True'], {say:`True or false? ${q} ... ${cand}`});
+  }
+  return mc(q,a,o,{long:a.length>16||o.some(w=>w.length>16)});
+}
 function buildBank(subject, unit, L, boost){
-  const S=SUBJECTS[subject], pre=subject.slice(0,3)+':';
+  const S=SUBJECTS[subject], pre=subject.slice(0,3)+':', rec=new Set(data.recent||[]);
   const units=unit==='mixed'?S.order:[unit];
   const pool=units.flatMap(k=>S.units[k].q.map(x=>({x,k})));
-  const pref=list=>{ const lvl=shuffle(list.filter(p=>p.x[0]===L)), lower=shuffle(list.filter(p=>p.x[0]<L)), higher=shuffle(list.filter(p=>p.x[0]>L)); return boost?[...lower,...lvl,...higher]:[...lvl,...lower,...higher]; };
+  const fr=list=>[...shuffle(list.filter(p=>!rec.has(pre+p.x[1]))),...shuffle(list.filter(p=>rec.has(pre+p.x[1])))];
+  const pref=list=>{ const lvl=fr(list.filter(p=>p.x[0]===L)), lower=fr(list.filter(p=>p.x[0]<L)), higher=fr(list.filter(p=>p.x[0]>L)); return boost?[...lower,...lvl,...higher]:[...lvl,...lower,...higher]; };
   const fresh=pool.filter(p=>!isMastered(pre+p.x[1])), old=pool.filter(p=>isMastered(pre+p.x[1]));
-  return [...pref(fresh),...pref(old)].slice(0,10).map(({x:[,q,a,...o],k})=>{ const m=mc(q,a,o,{long:a.length>16||o.some(w=>w.length>16)}); m.item=pre+q; m.skill=pre+k; m.topic=subject+':'+k;
-    if(subject==='french'||subject==='spanish'){ m.fl=subject==='french'?'fr-FR':'es-ES'; const mm=q.match(/“([^”]+)”/); m.flText=(mm&&!/^How do you say/.test(q))?mm[1]:''; }
+  return [...pref(fresh),...pref(old)].slice(0,10).map(({x,k})=>{ const q=x[1], m=bankVariant(subject,x,S.units[k].q); m.item=pre+q; m.skill=pre+k; m.topic=subject+':'+k;
+    if((subject==='french'||subject==='spanish')&&m.flText===undefined){ m.fl=subject==='french'?'fr-FR':'es-ES'; const mm=q.match(/“([^”]+)”/); m.flText=(mm&&!/^How do you say/.test(q))?mm[1]:''; }
     return m; });
 }
 function buildReading(L, boost){
   const done=p=>p.q.every((_,i)=>isMastered('read:'+p.t+':'+i));
-  const score=p=>(done(p)?10:0)+Math.abs(p.l-L)*(boost&&p.l<L?1:2)+(boost&&p.l>L?5:0)+Math.random();
+  const rec=new Set(data.recent||[]);
+  const score=p=>(done(p)?10:0)+(rec.has('read:'+p.t+':0')?4:0)+Math.abs(p.l-L)*(boost&&p.l<L?1:2)+(boost&&p.l>L?5:0)+Math.random();
   const picks=[...READ].sort((a,b)=>score(a)-score(b)).slice(0,2);
   const out=[];
   picks.forEach(p=>{
     const box=`<div class="passage"><b>${p.t}</b><br>${p.x}</div>`;
-    p.q.forEach(([q,a,...o],i)=>{ const m=mc(box+`<div class="pq">${q}</div>`,a,o,{long:a.length>14||o.some(w=>w.length>14),say:(i===0?p.t+'. '+p.x+' ... ':'')+q}); m.item='read:'+p.t+':'+i; m.skill='read:'+(['find','find','word','think','think'][i]||'find'); m.topic='reading'; out.push(m); });
+    shuffle(p.q.map((r,i)=>[r,i])).forEach(([[q,a,...o],i],j)=>{ const m=mc(box+`<div class="pq">${q}</div>`,a,o,{long:a.length>14||o.some(w=>w.length>14),say:(j===0?p.t+'. '+p.x+' ... ':'')+q}); m.item='read:'+p.t+':'+i; m.skill='read:'+(['find','find','word','think','think'][i]||'find'); m.topic='reading'; out.push(m); });
   });
   return out;
 }
@@ -1998,7 +2047,7 @@ function buildTest(subject, unit, level, boost){
   let qs;
   if(subject==='history'||subject==='geography'||subject==='french'||subject==='spanish'||subject==='life'){ qs=buildBank(subject, unit, Math.min(level,3), boost).filter(q=>!rev.some(r=>r.item===q.item)).slice(0,10-rev.length); }
   else if(subject==='reading'){ return buildReading(Math.min(level,3), boost); }
-  else if(subject==='science'){ qs=buildScience(unit, Math.min(level,3), boost).filter(q=>!rev.some(r=>r.item===q.item)).slice(0,10-rev.length); }
+  else if(subject==='science'){ qs=buildBank('science', unit, Math.min(level,3), boost).filter(q=>!rev.some(r=>r.item===q.item)).slice(0,10-rev.length); }
   else {
     let makers;
     if(subject==='maths'){ const L=Math.min(level,6); makers=(unit==='mixed'?MATHS_ORDER:[unit]).map(k=>()=>tagQ(unitQ(k,L,boost),'maths:'+k)); }
@@ -2087,6 +2136,9 @@ function quizLabel(q){ if(!q) return ''; const S=SUBJECTS[q.subject]; if(q.subje
 let hsSel=null;
 function renderHome(){
   $('#starsHome').textContent='⭐ '+data.stars;
+  const gn=data.golden||0, gp=data.perfects||0;
+  $('#goldCard').innerHTML=`<div class="game-card"><span class="emoji">🎫</span><div style="flex:1"><b style="font-size:18px">Golden Tickets: ${gn}</b><div class="mbar"><div style="width:${gp/3*100}%;background:#f0b400"></div></div><div class="locked">${gp} of 3 perfect 10/10 quizzes in a row · any other score starts the count again</div></div>${gn>0?'<button class="btn green small" id="useGold">Swap for a treat 🎁</button>':''}</div>`;
+  if($('#useGold')) $('#useGold').onclick=redeemGolden;
   const dm=daily(); $('#missionCard').innerHTML=`<div class="game-card"><span class="emoji">🎯</span><div style="flex:1"><b style="font-size:18px">Today’s mission: finish 3 quizzes</b><div class="mbar"><div style="width:${Math.min(100,dm.done/3*100)}%"></div></div><div class="locked">${dm.claimed?'Done! +15 bonus stars today 🎉':`${Math.min(dm.done,3)} of 3 done · prize: 15 bonus stars ⭐`}</div></div></div>`;
   $('#lvlSpelling').textContent=levelLabel(getLevel('spelling'),3);
   $('#lvlReading').textContent=levelLabel(getLevel('reading'),3)+' · short stories and facts';
@@ -2224,6 +2276,7 @@ let lastQuiz=null;
 function finishTest(){
   const n=cur.qs.length, need=Math.ceil(n*0.9), pass=cur.score>=need, S=SUBJECTS[cur.subject];
   lastQuiz={subject:cur.subject, unit:cur.unit};
+  data.recent=[...(data.recent||[]), ...cur.qs.map(q=>q.item).filter(Boolean)].slice(-80);
   data.history.push({subject:cur.subject, unit:cur.unit||null, level:cur.level||null, score:cur.score, n, date:new Date().toISOString()});
   if (data.history.length>200) data.history=data.history.slice(-200);
   if (cur.subject==='mtc') data.mtcBest=Math.max(data.mtcBest||0,cur.score);
@@ -2233,9 +2286,13 @@ function finishTest(){
     if(cur.subject!=='mtc' && !cur.boost) data.levels[key]=cur.level+1;
     data.tickets++; data.stars+=5;
   }
-  let coinMsg='';
+  let coinMsg='', goldenWin=false;
+  if (cur.score===n && n>0){ data.perfects=(data.perfects||0)+1; if(data.perfects>=3){ data.perfects=0; data.golden=(data.golden||0)+1; (data.goldenLog||(data.goldenLog=[])).push({t:'won',date:new Date().toISOString()}); goldenWin=true; } }
+  else if (n>0) data.perfects=0; // must be 3 perfect scores in a row
   const dm=daily(); dm.done++; if(dm.done>=3 && !dm.claimed){ dm.claimed=true; data.stars+=15; coinMsg='🎯 Daily mission complete: +15 bonus stars!'; }
   save();
+  if(cur.score===n && !goldenWin) coinMsg=(coinMsg?coinMsg+'<br>':'')+`🎫 Perfect score! ${data.perfects||0} in a row – get 3 in a row for a <b>Golden Ticket</b>`;
+  if(goldenWin) coinMsg=(coinMsg?coinMsg+'<br>':'')+'🎫 You won a GOLDEN TICKET!';
   $('#resCoins').innerHTML=coinMsg; $('#resCoins').classList.toggle('hidden',!coinMsg);
   $('#resTitle').textContent=`${S.emoji} ${cur.unit?unitName(cur.subject,cur.unit):S.name}`;
   $('#starsRes').textContent='⭐ '+data.stars;
@@ -2252,6 +2309,63 @@ function finishTest(){
   btns.append(mkBtn('🏠 Home','btn alt',renderHome));
   show('result');
   if (pass){ confetti(); happy(); setTimeout(happy,250); }
+  if (goldenWin) setTimeout(showGolden,1400);
+}
+/* ---------- GOLDEN TICKET: every 3 perfect (10/10) quizzes ---------- */
+function fanfare(){ const n=[523,659,784,1047,784,1047,1319]; n.forEach((f,i)=>setTimeout(()=>beep(f,.22,'triangle'),i*140)); setTimeout(()=>{ beep(1047,.6,'square'); beep(1319,.6,'triangle'); beep(1568,.6,'sine'); },n.length*140+60); }
+function sparkle(k){ for(let i=0;i<(k||8);i++) setTimeout(()=>beep(1500+Math.random()*1500,.08,'sine'),i*70); }
+function showGolden(){
+  const fx=document.createElement('div'); fx.className='gold-fx';
+  fx.innerHTML=`<div class="rays"></div>
+    <p style="position:relative;z-index:3;font-size:20px;font-weight:800;margin:0 0 18px" id="gHint">Something special is happening… 👀<br><span style="font-size:16px;font-weight:600">Tap the egg!</span></p>
+    <div class="gold-egg" id="gEgg"><div class="half top"></div><div class="half bot"></div></div>
+    <div class="gold-ticket" id="gTicket"><div style="font-size:42px">🎫</div><h2>GOLDEN TICKET</h2><div style="font-weight:700">3 perfect quizzes in a row! 🌟🌟🌟</div><div style="font-size:13px;margin-top:6px;opacity:.8">${String(player&&player.name||'').replace(/</g,'&lt;')} · ${new Date().toLocaleDateString('en-GB')}</div></div>
+    <div class="gmsg">You won a GOLDEN TICKET! 🏆<br><span style="font-size:16px;font-weight:600">Swap it with a grown-up for a treat 🎁</span></div>
+    <button class="btn green gbtn" id="gDone">Woohoo! ✨</button>`;
+  document.body.appendChild(fx);
+  sparkle(6);
+  let cracked=false;
+  const crack=()=>{ if(cracked) return; cracked=true; const egg=fx.querySelector('#gEgg'); egg.classList.add('shake'); fx.querySelector('#gHint').style.opacity='0';
+    let k=0; const rum=setInterval(()=>{ beep(120+Math.random()*80,.08,'sawtooth'); if(++k>9) clearInterval(rum); },90);
+    setTimeout(()=>{ egg.classList.remove('shake'); egg.classList.add('crack'); beep(900,.15,'square'); fx.classList.add('open'); fx.querySelector('#gTicket').classList.add('show'); fanfare(); confetti(); setTimeout(confetti,500); setTimeout(confetti,1100); setTimeout(()=>sparkle(12),900); },1000); };
+  fx.querySelector('#gEgg').onclick=crack; setTimeout(crack,3500);
+  fx.querySelector('#gDone').onclick=()=>{ fx.remove(); renderHome(); };
+}
+const ADULT_QS=[
+  ['What is the standard rate of VAT in the UK, as a percentage?',['20']],
+  ['In which year did the UK officially leave the European Union?',['2020']],
+  ['What is the speed limit for cars on a UK motorway, in mph?',['70']],
+  ['What is the national speed limit for a car on a single carriageway road, in mph?',['60']],
+  ['At what age can you start learning to drive a car on UK roads?',['17']],
+  ['What is 15% of 80?',['12']],
+  ['What is 18 × 24?',['432']],
+  ['What is 25% of 360?',['90']],
+  ['In which year did the UK switch to decimal money (Decimal Day)?',['1971']],
+  ['How many pints are there in a UK gallon?',['8']],
+  ['What is the minimum legal tyre tread depth for a car in the UK, in millimetres?',['1.6']],
+  ['For how many years is an adult UK passport valid?',['10']],
+  ['What is 7 × 8 × 9?',['504']],
+  ['What is 12.5% of 240?',['30']]
+];
+function redeemGolden(){
+  if(!(data.golden>0)) return;
+  const fx=document.createElement('div'); fx.className='gold-fx';
+  let used=[], q;
+  const next=()=>{ const pool=ADULT_QS.filter(x=>!used.includes(x[0])); q=pick(pool.length?pool:ADULT_QS); used.push(q[0]); };
+  const paint=(msg)=>{ fx.innerHTML=`<div class="adultbox"><div style="font-size:34px;text-align:center">🔒🎫</div><h2 style="margin:6px 0">Grown-up check</h2>
+      <p style="margin:0 0 8px;color:#6a64a0">Please pass this to a grown-up. Only a grown-up can swap a Golden Ticket for a treat.</p>
+      ${msg?`<p style="margin:0 0 8px;color:#c0306a;font-weight:700">${msg}</p>`:''}
+      <p style="font-weight:800;font-size:18px;margin:8px 0">${q[0]}</p>
+      <input id="adultIn" inputmode="decimal" autocomplete="off" placeholder="Type the answer">
+      <div class="row" style="justify-content:space-between"><button class="btn alt small" id="adultCancel">Cancel</button><button class="btn green" id="adultGo">Check ✓</button></div></div>`;
+    const inp=fx.querySelector('#adultIn'); setTimeout(()=>{ try{inp.focus();}catch(e){} },50);
+    const check=()=>{ const v=inp.value.toLowerCase().replace(/[%£,\s]|mph|mm|years?|pints?/g,''); if(!v) return;
+      if(q[1].includes(v)||q[1].includes(String(parseFloat(v)))){ data.golden--; (data.goldenLog||(data.goldenLog=[])).push({t:'redeemed',date:new Date().toISOString()}); save(); win(); }
+      else { beep(200,.2,'sawtooth'); next(); paint('Not quite! Here is a different grown-up question.'); } };
+    fx.querySelector('#adultGo').onclick=check; inp.onkeydown=e=>{ if(e.key==='Enter') check(); };
+    fx.querySelector('#adultCancel').onclick=()=>fx.remove(); };
+  const win=()=>{ fx.innerHTML=`<div class="rays"></div><div class="gold-ticket show"><div style="font-size:48px">🎁</div><h2>TREAT TIME!</h2><div style="font-weight:700">Golden Ticket swapped for a treat. Enjoy it!</div></div><button class="btn green gbtn" id="gDone" style="margin-top:220px">Yay! 🎉</button>`; fx.classList.add('open'); fanfare(); confetti(); setTimeout(confetti,600); fx.querySelector('#gDone').onclick=()=>{ fx.remove(); renderHome(); }; };
+  next(); paint(''); document.body.appendChild(fx);
 }
 function mkBtn(t,c,f){ const b=document.createElement('button'); b.className=c; b.textContent=t; b.onclick=f; return b; }
 function confetti(){
@@ -2300,6 +2414,7 @@ function renderParent(){
   </div>
   <div class="card"><h2>✖️ Times tables map</h2><p class="empty">Green = mastered · amber = practised · red = needs work · blank = not seen yet</p><div style="overflow-x:auto">${heat}</div></div>
   <div class="card"><h2>⚙️ Tools</h2>
+    <p class="empty">🎫 Golden Tickets: <b>${data.golden||0}</b> waiting · won ${(data.goldenLog||[]).filter(x=>x.t==='won').length} · swapped for treats ${(data.goldenLog||[]).filter(x=>x.t==='redeemed').length}${(data.goldenLog||[]).length?' · last: '+new Date(data.goldenLog[data.goldenLog.length-1].date).toLocaleDateString('en-GB'):''}</p>
     <div class="row" style="justify-content:flex-start"><button class="btn alt small" id="giveTicket">+1 game ticket</button><button class="btn alt small" id="newPin">Change PIN</button><button class="btn small" id="resetAll">${resetArmed?'Tap again to RESET everything':'Reset all progress'}</button></div>
     <p class="empty">${mode==='cloud'?'Progress is saved to your Google account, so it works on any device you sign in on.':'Progress is saved in this browser only. Sign in with Google to keep it safe and use it on other devices.'}</p>
   </div>
