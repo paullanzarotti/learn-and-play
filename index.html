@@ -252,7 +252,7 @@ canvas{display:block;width:100%;border-radius:20px;background:#1d1747;touch-acti
 <!-- QUIZ -->
 <section id="quiz" class="hidden">
   <div class="wrap">
-    <div class="top"><button class="btn alt small" id="quitQuiz">✕ Stop</button><div class="pill" id="quizTitle"></div></div>
+    <div class="top"><div class="row" style="gap:6px;margin:0;flex-wrap:nowrap"><button class="btn alt small" id="quitQuiz">← Back</button><button class="btn alt small" id="quizHome" title="Home">🏠</button></div><div class="pill" id="quizTitle"></div></div>
     <div class="prog" id="prog"></div>
     <div class="warm hidden" id="warmup">💪 Warm-up round! A slightly easier quiz to get you back in the groove.</div>
     <div class="card">
@@ -2079,7 +2079,8 @@ const FACTS=[
 ];
 
 /* ---------- screens ---------- */
-function show(id){ for (const s of ['welcome','players','addPlayer','home','topics','quiz','result','picker','game','parent']) $('#'+s).classList.toggle('hidden', s!==id); window.scrollTo(0,0); }
+let curScreen='welcome';
+function show(id){ curScreen=id; for (const s of ['welcome','players','addPlayer','home','topics','quiz','result','picker','game','parent']) $('#'+s).classList.toggle('hidden', s!==id); window.scrollTo(0,0); }
 function levelLabel(l,max){ max=max||3; return l>max ? `Level ${l} · Champion` : `Level ${l}`; }
 function quizLabel(q){ if(!q) return ''; const S=SUBJECTS[q.subject]; if(q.subject==='mtc') return S.name; return `${S.name}${q.unit?' · '+unitName(q.subject,q.unit):''} ${levelLabel(getLevel(q.subject,q.unit),S.max)}`; }
 
@@ -2247,7 +2248,8 @@ function finishTest(){
   const btns=$('#resBtns'); btns.innerHTML='';
   if (pass) btns.append(mkBtn('Choose your game 🎮','btn green',()=>renderPicker()));
   else btns.append(mkBtn('Try again ↻','btn',()=>startTest(cur.subject,cur.unit)));
-  btns.append(mkBtn('Home','btn alt',renderHome));
+  if(hasTopics(cur.subject)){ const sub=cur.subject; btns.append(mkBtn('← '+SUBJECTS[sub].name+' topics','btn alt',()=>renderTopics(sub))); }
+  btns.append(mkBtn('🏠 Home','btn alt',renderHome));
   show('result');
   if (pass){ confetti(); happy(); setTimeout(happy,250); }
 }
@@ -2819,7 +2821,26 @@ document.addEventListener('keydown',e=>{
 });
 $('#pickerHome').onclick=renderHome;
 $('#nextBtn').onclick=next;
-$('#quitQuiz').onclick=()=>{ clearTimeout(qTimer); renderHome(); };
+const hasTopics=sub=>!!(SUBJECTS[sub]&&SUBJECTS[sub].units);
+function backFromQuiz(){ clearTimeout(qTimer); try{ speechSynthesis.cancel(); }catch(e){} if(cur&&hasTopics(cur.subject)) renderTopics(cur.subject); else renderHome(); }
+$('#quitQuiz').onclick=backFromQuiz;
+$('#quizHome').onclick=()=>{ clearTimeout(qTimer); try{ speechSynthesis.cancel(); }catch(e){} renderHome(); };
+/* the browser / phone back button goes back one section */
+function goBack(){
+  switch(curScreen){
+    case 'quiz': case 'result': backFromQuiz(); return true;
+    case 'topics': case 'picker': renderHome(); return true;
+    case 'parent': parentOK=false; renderHome(); return true;
+    case 'game': if(g&&g.phase!=='over'){ endGame(); } else { stopGame(); renderHome(); } return true;
+    case 'addPlayer': showPlayers(); return true;
+    default: return false;
+  }
+}
+try{
+  history.replaceState({lp:0},'');
+  history.pushState({lp:1},'');
+  window.addEventListener('popstate',()=>{ if(goBack()) history.pushState({lp:1},''); else history.back(); });
+}catch(e){}
 $('#sayBtn').onclick=()=>{ const q=cur&&cur.qs[cur.i]; if(!q) return; speak(cur.subject==='spelling'||q.type==='input' ? q.say : q.say + '. Is it: '+q.options.join(', or ')+'?'); if(q.fl&&q.flText) speakForeign(q.flText,q.fl); };
 try{ speechSynthesis.getVoices(); }catch(e){}
 
